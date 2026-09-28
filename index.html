@@ -33,7 +33,8 @@
             background: #333;
             padding: 10px;
             border-radius: 8px;
-            margin: 10px 0;
+            margin: 10px auto;
+            max-width: 400px;
             display: flex;
             justify-content: space-around;
             font-size: 16px;
@@ -116,6 +117,47 @@
             background: #1a1a1a;
             color: #fff;
         }
+        /* Winners Ticker Styling */
+        .winners-ticker {
+            background: #1f1f1f;
+            border: 2px dashed #4CAF50;
+            border-radius: 8px;
+            margin: 15px auto;
+            max-width: 400px;
+            padding: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+        .winners-ticker h4 {
+            color: #4CAF50;
+            margin-bottom: 5px;
+            font-size: 14px;
+            text-align: center;
+        }
+        .marquee-container {
+            height: 40px;
+            overflow: hidden;
+            position: relative;
+        }
+        .marquee-content {
+            position: absolute;
+            width: 100%;
+            animation: scrollUp 25s linear infinite;
+        }
+        .winner-item {
+            font-size: 13px;
+            padding: 4px 0;
+            color: #ddd;
+            text-align: center;
+        }
+        .winner-item span {
+            color: #ffcc00;
+            font-weight: bold;
+        }
+        @keyframes scrollUp {
+            0% { top: 100%; }
+            100% { top: -450%; }
+        }
     </style>
 </head>
 <body>
@@ -143,6 +185,16 @@
 
     <button class="btn" id="jumpBtn" onclick="makeJump()">JUMP (TAP HERE)</button>
 
+    <!-- Live Winners Ticker (50 Names List) -->
+    <div class="winners-ticker">
+        <h4>🔴 Live Winners Feed</h4>
+        <div class="marquee-container">
+            <div class="marquee-content" id="winnersList">
+                <!-- JavaScript se 50 names yahan insert honge -->
+            </div>
+        </div>
+    </div>
+
     <!-- Deposit & TID Section -->
     <div class="section">
         <h3>JazzCash Deposit Verification</h3>
@@ -157,6 +209,34 @@
     </div>
 
     <script>
+        // 50 Names & Winnings Data Generator
+        const pakistaniNames = [
+            "Ali Raza", "Usman Khan", "Bilal Ahmed", "Hamza Ali", "Zainab Bibi", 
+            "Awais Qarni", "Faizan Shah", "Ayesha Malik", "Danyal Sheikh", "Haris Rauf",
+            "Kamran Akmal", "Shoaib Malik", "Babar Azam", "Mohammad Rizwan", "Shaheen Afridi",
+            "Naseem Shah", "Fakhar Zaman", "Imam-ul-Haq", "Shadab Khan", "Haris Sohail",
+            "Hassan Ali", "Sarfaraz Ahmed", "Asif Ali", "Haider Ali", "Khushdil Shah",
+            "Usman Qadir", "Zahid Mahmood", "Mohammad Nawaz", "Iftikhar Ahmed", "Shan Masood",
+            "Abdullah Shafique", "Saud Shakeel", "Agha Salman", "Mohammad Wasim", "Mir Hamza",
+            "Sajid Khan", "Nauman Ali", "Zahid Mehmood", "Abid Ali", "Azhar Ali",
+            "Yasir Shah", "Wahab Riaz", "Mohammad Amir", "Imad Wasim", "Haris Sohail",
+            "Sohail Tanvir", "Kamran Ghulam", "Omair Yousuf", "Qasim Akram", "Haseebullah"
+        ];
+
+        const winningAmounts = [200, 300, 400, 500, 750, 1000, 1200, 1500, 2000, 2500, 3000, 4000, 5000];
+
+        function generateWinnersList() {
+            let tickerHTML = '';
+            for (let i = 0; i < pakistaniNames.length; i++) {
+                let randomName = pakistaniNames[i];
+                let randomAmount = winningAmounts[Math.floor(Math.random() * winningAmounts.length)];
+                tickerHTML += `<div class="winner-item">🎉 <span>${randomName}</span> won <span>Rs. ${randomAmount}</span></div>`;
+            }
+            document.getElementById('winnersList').innerHTML = tickerHTML;
+        }
+
+        generateWinnersList();
+
         // LocalStorage Wallet Setup (Demo initial balance 100)
         let balance = localStorage.getItem('chicken_balance') ? parseInt(localStorage.getItem('chicken_balance')) : 100;
         document.getElementById('userBalance').innerText = 'Rs. ' + balance;
