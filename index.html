@@ -542,7 +542,7 @@
 
         // Winners Data List
         const winnersData = [
-            { name: "Qasim", amount: 1200 },
+            { name: "Mobila Muzammil", amount: 1200 },
             { name: "Zubair Gujjar", amount: 1500 },
             { name: "Salman Butt", amount: 2350 },
             { name: "Kashif Mehmood", amount: 1050 },
@@ -596,9 +596,9 @@
 
         let obstacle = {
             x: 400,
-            y: 175,
-            width: 20,
-            height: 25,
+            y: 170,
+            width: 30,
+            height: 30,
             speed: 5
         };
 
@@ -669,7 +669,7 @@
             }
 
             obstacle.x -= obstacle.speed;
-            if (obstacle.x < -20) {
+            if (obstacle.x < -30) {
                 obstacle.x = 400;
                 score += 10;
                 if(score % 50 === 0) obstacle.speed += 0.5;
@@ -713,9 +713,9 @@
             ctx.font = '28px Arial';
             ctx.fillText('🐔', chicken.x - 4, chicken.y + 24);
 
-            // Obstacle
-            ctx.fillStyle = '#ff4444';
-            ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+            // Obstacle (Bomb Emoji 💣)
+            ctx.font = '28px Arial';
+            ctx.fillText('💣', obstacle.x - 2, obstacle.y + 24);
 
             // Initial Start Screen Overlay
             if (!gameStarted && !isPaused && !checkGameLockCondition()) {
