@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chicken Run Game</title>
+    <title>Chicken Run Game & Earn</title>
     <style>
         * {
             box-sizing: border-box;
@@ -82,7 +82,7 @@
             border-radius: 6px;
         }
         .game-area {
-            height: 220px;
+            height: 250px;
             background: #0f172a;
             border-radius: 8px;
             position: relative;
@@ -96,8 +96,15 @@
             font-size: 40px;
             position: absolute;
             left: 30px;
-            bottom: 20px;
-            transition: bottom 0.3s ease;
+            transition: bottom 0.3s;
+        }
+        .obstacle {
+            width: 20px;
+            height: 40px;
+            background: #ff3333;
+            position: absolute;
+            right: 0;
+            border-radius: 4px;
         }
         .nav-tabs {
             display: flex;
@@ -106,25 +113,15 @@
         }
         .nav-tabs button {
             flex: 1;
-            padding: 10px;
+            padding: 8px;
             background: #2c2c2c;
             border: none;
             color: white;
-            border-radius: 6px;
+            border-radius: 5px;
             cursor: pointer;
-            font-weight: bold;
-            font-size: 14px;
         }
         .nav-tabs button.active {
             background: #ff5722;
-        }
-        .status-box {
-            background: #2c2c2c;
-            padding: 12px;
-            border-radius: 8px;
-            margin-top: 10px;
-            font-size: 14px;
-            border-left: 4px solid #ff5722;
         }
     </style>
 </head>
@@ -133,7 +130,7 @@
     <div class="container">
         <header>
             <h2>🐔 Chicken Run</h2>
-            <div class="wallet-box">Rs: <span id="balance">100</span></div>
+            <div class="wallet-box">Rs: <span id="balance">0</span></div>
         </header>
 
         <div class="nav-tabs">
@@ -144,17 +141,18 @@
 
         <!-- GAME SECTION -->
         <div id="game" class="section active">
-            <div class="game-area">
-                <div class="chicken" id="chicken">🐔</div>
+            <div class="game-area" id="gameArea">
+                <div class="chicken" id="chicken" style="bottom: 20px;">🐔</div>
             </div>
-            <p style="text-align: center; margin-bottom: 10px; font-size: 14px; color: #aaa;">Tap Jump to win coins! (Cost: 10 Rs)</p>
-            <button class="btn" onclick="jumpChicken()">Jump Now!</button>
+            <p style="text-align: center; margin-bottom: 10px; font-size: 14px; color: #aaa;">Jump to avoid obstacles & win coins!</p>
+            <button class="btn" onclick="jumpChicken()">Jump! (Cost: 10 Rs)</button>
+            <button class="btn btn-secondary" onclick="startGame()">Start Game</button>
         </div>
 
         <!-- DEPOSIT SECTION -->
         <div id="deposit" class="section">
             <h3>Add Funds (Manual)</h3>
-            <p style="font-size: 13px; color: #aaa; margin-top: 5px;">Send money to our JazzCash/EasyPaisa account and submit details.</p>
+            <p style="font-size: 13px; color: #aaa; margin-top: 5px;">Send money to our JazzCash/EasyPaisa account and submit details below.</p>
             
             <div style="background: #2c2c2c; padding: 10px; border-radius: 6px; margin: 10px 0; font-size: 14px;">
                 <p><b>JazzCash / EasyPaisa:</b> 0300-1234567</p>
@@ -193,18 +191,16 @@
             <input type="number" id="wdAmount" placeholder="Enter amount">
 
             <button class="btn" onclick="submitWithdraw()">Request Withdrawal</button>
-            
-            <div id="withdrawStatus"></div>
         </div>
     </div>
 
     <script>
-        let balance = 100; 
-        let hasWithdrawnBefore = false;
+        let balance = 100; // Free starting balance for testing
+        updateBalance();
 
         function switchTab(tabId) {
             document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
-            document.querySelectorAll('.nav-tabs button').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             
             document.getElementById(tabId).classList.add('active');
             event.target.classList.add('active');
@@ -223,14 +219,19 @@
             updateBalance();
 
             const chicken = document.getElementById('chicken');
-            chicken.style.bottom = '100px';
+            chicken.style.bottom = '120px';
             setTimeout(() => {
                 chicken.style.bottom = '20px';
+                // Random win reward
                 if (Math.random() > 0.4) {
                     balance += 25;
                     updateBalance();
                 }
             }, 300);
+        }
+
+        function startGame() {
+            alert("Game session active! Tap Jump to play.");
         }
 
         function submitDeposit() {
@@ -240,7 +241,7 @@
                 alert("Please fill all fields!");
                 return;
             }
-            alert("Deposit request submitted successfully! Admin will verify your TID.");
+            alert("Deposit request submitted successfully! Admin will verify your TID (" + tid + ") and approve within 30 minutes.");
             document.getElementById('depAmount').value = '';
             document.getElementById('depTid').value = '';
         }
@@ -248,8 +249,6 @@
         function submitWithdraw() {
             const amount = document.getElementById('wdAmount').value;
             const account = document.getElementById('wdAccount').value;
-            const statusDiv = document.getElementById('withdrawStatus');
-
             if(!amount || !account) {
                 alert("Please fill all fields!");
                 return;
@@ -258,29 +257,9 @@
                 alert("Insufficient balance!");
                 return;
             }
-
             balance -= parseInt(amount);
             updateBalance();
-
-            if (!hasWithdrawnBefore) {
-                hasWithdrawnBefore = true;
-                statusDiv.innerHTML = `
-                    <div class="status-box">
-                        <b>Withdrawal Request Submitted!</b><br>
-                        Status: <span style="color: #ff9800;">Pending (24 Hours Timer)</span><br>
-                        Your first withdrawal of Rs. ${amount} is under review and will be transferred within 24 hours.
-                    </div>
-                `;
-            } else {
-                statusDiv.innerHTML = `
-                    <div class="status-box" style="border-left-color: #00ffcc;">
-                        <b>Withdrawal Request Submitted!</b><br>
-                        Status: <span style="color: #00ffcc;">Processing</span><br>
-                        Rs. ${amount} sent to ${account}.
-                    </div>
-                `;
-            }
-
+            alert("Withdrawal request submitted for " + amount + " PKR to " + account);
             document.getElementById('wdAmount').value = '';
             document.getElementById('wdAccount').value = '';
         }
