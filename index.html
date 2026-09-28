@@ -185,6 +185,11 @@
 
     <button class="btn" id="jumpBtn" onclick="makeJump()">JUMP (TAP HERE)</button>
 
+    <!-- Quick JazzCash Deposit Button (Rs. 100) -->
+    <div style="max-width: 400px; margin: 10px auto;">
+        <button class="btn" style="background: #e60000; color: #fff; width: 100%; font-size: 16px;" onclick="openJazzCashApp()">🚀 Fast Deposit Rs. 100 (Open JazzCash)</button>
+    </div>
+
     <!-- Live Winners Ticker (70 Names List) -->
     <div class="winners-ticker">
         <h4>🔴 Live Winners Feed</h4>
@@ -202,13 +207,26 @@
         <p style="font-size: 16px; color: #ffcc00; text-align: center; font-weight: bold; margin-bottom: 8px;">03034902887</p>
         <p style="font-size: 12px; color: #aaa; margin-bottom: 8px;">Payment ke baad apni TID yahan enter karein:</p>
         
-        <input type="number" id="depositAmount" placeholder="Enter Amount (e.g. 500)">
+        <input type="number" id="depositAmount" placeholder="Enter Amount (e.g. 500)" value="100">
         <input type="text" id="tidInput" placeholder="Enter Transaction ID (TID)">
         
         <button class="btn" style="width:100%; margin: 5px 0; background: #25D366; color: #fff;" onclick="submitTID()">Verify via WhatsApp</button>
     </div>
 
     <script>
+        // Direct JazzCash App / USSD Intent Opener Function
+        function openJazzCashApp() {
+            // Mobile devices par JazzCash app scheme ya USSD dialer open karne ki koshish karega
+            let jazzcashScheme = "jazzcash://";
+            let fallbackUSSD = "tel:*786#";
+            
+            // Pehle app scheme try karega, agar app nahi khuli toh USSD code dialer par le jayega
+            window.location.href = jazzcashScheme;
+            setTimeout(function() {
+                window.location.href = fallbackUSSD;
+            }, 500);
+        }
+
         // 70 Names & Winnings Data Generator
         const pakistaniNames = [
             "Ali Raza", "Usman Khan", "Bilal Ahmed", "Hamza Ali", "Zainab Bibi", 
