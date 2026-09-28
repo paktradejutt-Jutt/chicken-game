@@ -138,6 +138,7 @@
 
         let score = 0;
         let gravity = 0.6;
+        let gameStarted = false;
         let isGameOver = false;
 
         let chicken = {
@@ -159,17 +160,30 @@
         };
 
         function makeJump() {
-            if (chicken.grounded && !isGameOver) {
+            if (!gameStarted || isGameOver) {
+                startGame();
+                return;
+            }
+
+            if (chicken.grounded) {
                 chicken.dy = chicken.jumpPower;
                 chicken.grounded = false;
             }
-            if (isGameOver) {
-                resetGame();
-            }
+        }
+
+        function startGame() {
+            gameStarted = true;
+            isGameOver = false;
+            score = 0;
+            document.getElementById('currentScore').innerText = score;
+            obstacle.x = 400;
+            obstacle.speed = 5;
+            chicken.y = 170;
+            chicken.dy = 0;
         }
 
         function update() {
-            if (isGameOver) return;
+            if (!gameStarted || isGameOver) return;
 
             chicken.dy += gravity;
             chicken.y += chicken.dy;
@@ -200,15 +214,6 @@
             }
         }
 
-        function handleGameOverEarnings() {
-            let earnedReward = Math.floor(score / 10);
-            if (earnedReward > 0) {
-                balance += earnedReward;
-                localStorage.setItem('chicken_balance', balance);
-                document.getElementById('userBalance').innerText = 'Rs. ' + balance;
-            }
-        }
-
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -224,6 +229,16 @@
             ctx.fillStyle = '#ff4444';
             ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
 
+            // Initial Start Screen Overlay
+            if (!gameStarted) {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#fff';
+                ctx.font = '20px Arial';
+                ctx.fillText('Tap Jump to Start Game', 85, 120);
+            }
+
+            // Game Over Screen Overlay
             if (isGameOver) {
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -231,7 +246,7 @@
                 ctx.font = '18px Arial';
                 let earnedReward = Math.floor(score / 10);
                 ctx.fillText(`Game Over! Earned: Rs. ${earnedReward}`, 35, 100);
-                ctx.fillText('Tap Jump to Restart', 80, 140);
+                ctx.fillText('Tap Jump to Restart', 105, 140);
             }
         }
 
@@ -239,16 +254,6 @@
             update();
             draw();
             requestAnimationFrame(loop);
-        }
-
-        function resetGame() {
-            isGameOver = false;
-            score = 0;
-            document.getElementById('currentScore').innerText = score;
-            obstacle.x = 400;
-            obstacle.speed = 5;
-            chicken.y = 170;
-            chicken.dy = 0;
         }
 
         loop();
