@@ -104,7 +104,7 @@
 
     <header>
         <h1>🐔 Chicken Run PK</h1>
-        <p>Play Game & Redeem Promo Balance</p>
+        <p>Play Game & Deposit via TID</p>
     </header>
 
     <div class="wallet-box">
@@ -118,19 +118,22 @@
     </div>
     <button class="btn" id="jumpBtn" onclick="makeJump()">JUMP (TAP HERE)</button>
 
-    <!-- Deposit & Promo Code Section -->
+    <!-- Deposit & TID Section -->
     <div class="section">
-        <h3>Deposit via JazzCash</h3>
-        <p style="font-size: 13px; margin-bottom: 5px;">Send amount to JazzCash Account:</p>
+        <h3>JazzCash Deposit Verification</h3>
+        <p style="font-size: 13px; margin-bottom: 3px;">Send payment to JazzCash Account:</p>
         <p style="font-size: 16px; color: #ffcc00; text-align: center; font-weight: bold; margin-bottom: 8px;">03034902887</p>
-        <p style="font-size: 12px; color: #aaa; margin-bottom: 10px;">Payment ke baad mujhse code le kar yahan enter karein:</p>
-        <input type="text" id="promoInput" placeholder="Enter Promo Code (e.g. JUTT500)">
-        <button class="btn" style="width:100%; margin: 5px 0;" onclick="redeemPromo()">Redeem Code</button>
+        <p style="font-size: 12px; color: #aaa; margin-bottom: 8px;">Payment ke baad apni TID yahan enter karein:</p>
+        
+        <input type="number" id="depositAmount" placeholder="Enter Amount (e.g. 500)">
+        <input type="text" id="tidInput" placeholder="Enter Transaction ID (TID)">
+        
+        <button class="btn" style="width:100%; margin: 5px 0; background: #25D366; color: #fff;" onclick="submitTID()">Verify via WhatsApp</button>
     </div>
 
     <script>
         // LocalStorage Wallet Setup
-        let balance = localStorage.getItem('chicken_balance') ? parseInt(localStorage.getItem('chicken_balance')) : 100;
+        let balance = localStorage.getItem('chicken_balance') ? parseInt(localStorage.getItem('chicken_balance')) : 0;
         document.getElementById('userBalance').innerText = 'Rs. ' + balance;
 
         const canvas = document.getElementById('gameCanvas');
@@ -214,6 +217,15 @@
             }
         }
 
+        function handleGameOverEarnings() {
+            let earnedReward = Math.floor(score / 10);
+            if (earnedReward > 0) {
+                balance += earnedReward;
+                localStorage.setItem('chicken_balance', balance);
+                document.getElementById('userBalance').innerText = 'Rs. ' + balance;
+            }
+        }
+
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -258,34 +270,24 @@
 
         loop();
 
-        // Promo Code Logic
-        function redeemPromo() {
-            let code = document.getElementById('promoInput').value.trim().toUpperCase();
+        // TID & WhatsApp Submission Logic
+        function submitTID() {
+            let amount = document.getElementById('depositAmount').value.trim();
+            let tid = document.getElementById('tidInput').value.trim();
 
-            if(!code) {
-                alert('Please enter a promo code!');
+            if (!amount || !tid) {
+                alert('Please enter both Amount and Transaction ID (TID)!');
                 return;
             }
 
-            let addedAmount = 0;
+            // Aapka WhatsApp Number yahan set hai (international format mein without +)
+            let adminPhone = '923034902887'; 
 
-            if (code === 'JUTT100') {
-                addedAmount = 100;
-            } else if (code === 'JUTT500') {
-                addedAmount = 500;
-            } else if (code === 'WIN1000') {
-                addedAmount = 1000;
-            } else {
-                alert('Invalid or Expired Promo Code!');
-                return;
-            }
+            let message = `Hello Admin, I have sent Rs. ${amount} via JazzCash to your account (03034902887).%0ATID: ${tid}%0APlease verify and add balance to my account.`;
 
-            balance += addedAmount;
-            localStorage.setItem('chicken_balance', balance);
-            document.getElementById('userBalance').innerText = 'Rs. ' + balance;
+            let whatsappURL = `https://wa.me/${adminPhone}?text=${message}`;
 
-            alert(`Congratulations! Rs. ${addedAmount} added to your balance successfully.`);
-            document.getElementById('promoInput').value = '';
+            window.open(whatsappURL, '_blank');
         }
     </script>
 </body>
