@@ -251,7 +251,6 @@
 
     <div class="wallet-box">
         <div>Balance: <span id="userBalance">Rs. 0</span></div>
-        <div>Time: <span id="timerDisplay">05:00</span></div>
     </div>
 
     <!-- Game Area -->
@@ -315,22 +314,12 @@
         // LocalStorage Setup
         let balance = localStorage.getItem('chicken_balance') ? parseInt(localStorage.getItem('chicken_balance')) : 100;
         let approvedDeposits = localStorage.getItem('chicken_approved_deposits') ? parseInt(localStorage.getItem('chicken_approved_deposits')) : 0;
-        let totalPlayedSeconds = localStorage.getItem('chicken_play_time') ? parseInt(localStorage.getItem('chicken_play_time')) : 0;
-        const maxPlaySeconds = 300; 
 
         // Withdrawal Timer Setup
         let withdrawEndTimestamp = localStorage.getItem('chicken_withdraw_end') ? parseInt(localStorage.getItem('chicken_withdraw_end')) : 0;
         let firstWithdrawalDone = localStorage.getItem('chicken_first_withdrawal_done') === 'true';
 
         document.getElementById('userBalance').innerText = 'Rs. ' + balance;
-
-        function updateTimerDisplay() {
-            let remaining = Math.max(0, maxPlaySeconds - totalPlayedSeconds);
-            let mins = Math.floor(remaining / 60);
-            let secs = remaining % 60;
-            document.getElementById('timerDisplay').innerText = (mins < 10 ? '0' : '') + mins + ':' + (secs < 10 ? '0' : '') + secs;
-        }
-        updateTimerDisplay();
 
         function updateWithdrawTimerDisplay() {
             let now = Date.now();
@@ -365,18 +354,14 @@
         }
 
         function checkGameLockCondition() {
-            // Check Referral/Time Limit Condition (Balance >= 500 OR Time >= 5 mins)
-            if ((balance >= 500 || totalPlayedSeconds >= maxPlaySeconds) && approvedDeposits < 5) {
+            // Check Referral Condition (Balance >= 500)
+            if (balance >= 500 && approvedDeposits < 5) {
                 let percentage = (approvedDeposits / 5) * 100;
                 document.getElementById('progressFill').style.width = percentage + '%';
                 document.getElementById('progressText').innerText = approvedDeposits + ' / 5 Approved Deposits Completed';
                 
                 document.getElementById('modalTitle').innerText = "🔒 Game Locked / Limit Reached!";
-                if (totalPlayedSeconds >= maxPlaySeconds) {
-                    document.getElementById('modalReason').innerHTML = `Aapka total game play time <b>5 minutes</b> mukammal ho chuka hai! Mazeed game khelne ke liye apne invitees ke Rs. 100 deposit ki WhatsApp request approve karwana lazmi hai.`;
-                } else {
-                    document.getElementById('modalReason').innerHTML = `Aapka balance <b>Rs. 500 ya usse zyada</b> ho chuka hai! Mazeed game khelne aur withdraw karne ke liye apne invitees ke Rs. 100 deposit ki WhatsApp request approve karwana lazmi hai.`;
-                }
+                document.getElementById('modalReason').innerHTML = `Aapka balance <b>Rs. 500 ya usse zyada</b> ho chuka hai! Mazeed game khelne aur withdraw karne ke liye apne invitees ke Rs. 100 deposit ki WhatsApp request approve karwana lazmi hai.`;
 
                 document.getElementById('referralProgressContainer').style.display = 'block';
                 document.getElementById('actionButtonsDiv').style.display = 'block';
@@ -594,21 +579,6 @@
                 pauseBtn.innerText = 'Pause';
             }
         }
-
-        // Gameplay Timer Loop
-        setInterval(function() {
-            if (gameStarted && !isPaused && !isGameOver) {
-                if (totalPlayedSeconds < maxPlaySeconds) {
-                    totalPlayedSeconds++;
-                    localStorage.setItem('chicken_play_time', totalPlayedSeconds);
-                    updateTimerDisplay();
-
-                    if (totalPlayedSeconds >= maxPlaySeconds) {
-                        checkGameLockCondition();
-                    }
-                }
-            }
-        }, 1000);
 
         function update() {
             if (!gameStarted || isPaused) return;
