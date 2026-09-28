@@ -37,7 +37,7 @@
             max-width: 400px;
             display: flex;
             justify-content: space-around;
-            font-size: 14px;
+            font-size: 13px;
         }
         .wallet-box span {
             color: #4CAF50;
@@ -228,7 +228,7 @@
     <div class="modal-overlay" id="referralModal">
         <div class="modal-box">
             <h2 id="modalTitle">🔒 Game Locked / Limit Reached!</h2>
-            <p id="modalReason">Limit poori ho chuki hai! Jab tak aapke <b>5 invitees Rs. 100 ka deposit karke aapko WhatsApp par request bhejenge aur aap unhein approve karenge</b>, tab tak game lock rahegi.</p>
+            <p id="modalReason">Limit poori ho chuki hai!</p>
             
             <div class="progress-bar-bg" id="referralProgressContainer">
                 <div class="progress-bar-fill" id="progressFill"></div>
@@ -273,12 +273,20 @@
         <button class="btn" style="background: #e60000; color: #fff; width: 100%; font-size: 16px;" onclick="copyAndPromptJazzCash()">🚀 Fast Deposit Rs. 100 (Copy JazzCash)</button>
     </div>
 
-    <!-- Withdrawal Section (Minimum Rs. 500 Option) -->
+    <!-- Withdrawal Section (Minimum Rs. 500 Option + 24Hr / 1Min Wait) -->
     <div class="section" style="text-align: center;">
         <h3>💰 Request Withdrawal</h3>
-        <p style="font-size: 13px; color: #aaa; margin-bottom: 10px;">Minimum Withdrawal Limit: <b style="color: #4CAF50;">Rs. 500</b></p>
+        <p style="font-size: 13px; color: #aaa; margin-bottom: 5px;">Minimum Limit: <b style="color: #4CAF50;">Rs. 500</b></p>
+        <p style="font-size: 12px; color: #ff9800; margin-bottom: 10px;">⏳ Withdrawal Wait: <b>1st Withdrawal: 24 Hours | Next: 1 Minute</b></p>
+        
         <input type="text" id="withdrawAccount" placeholder="Enter JazzCash / EasyPaisa Account No">
-        <button class="btn" style="width:100%; margin: 5px 0; background: #ffcc00; color: #000;" onclick="requestWithdrawal()">Withdraw via WhatsApp (Min 500)</button>
+        
+        <!-- Withdrawal Timer Display -->
+        <div id="withdrawStatusBox" style="margin: 10px 0; font-size: 13px; display: none; background: #333; padding: 8px; border-radius: 6px;">
+            Withdrawal Pending... Time Left: <span id="withdrawCountdown" style="color: #ffcc00; font-weight: bold;">00:00</span>
+        </div>
+
+        <button class="btn" id="withdrawBtn" style="width:100%; margin: 5px 0; background: #ffcc00; color: #000;" onclick="requestWithdrawal()">Withdraw via WhatsApp (Min 500)</button>
     </div>
 
     <!-- Live Winners Ticker List -->
@@ -314,6 +322,10 @@
         // 1 Hour Rest Timer Setup (3600 seconds)
         let restEndTimestamp = localStorage.getItem('chicken_rest_end') ? parseInt(localStorage.getItem('chicken_rest_end')) : 0;
 
+        // Withdrawal Timer Setup
+        let withdrawEndTimestamp = localStorage.getItem('chicken_withdraw_end') ? parseInt(localStorage.getItem('chicken_withdraw_end')) : 0;
+        let firstWithdrawalDone = localStorage.getItem('chicken_first_withdrawal_done') === 'true';
+
         document.getElementById('userBalance').innerText = 'Rs. ' + balance;
 
         function updateTimerDisplay() {
@@ -333,10 +345,42 @@
                 let secs = diffSecs % 60;
                 document.getElementById('restTimerDisplay').innerText = 
                     (hrs < 10 ? '0' : '') + hrs + ':' + (mins < 10 ? '0' : '') + mins + ':' + (secs < 10 ? '0' : '') + secs;
-                return true; // Rest active
+                return true; 
             } else {
                 document.getElementById('restTimerDisplay').innerText = "00:00:00";
-                return false; // Rest over
+                return false; 
+            }
+        }
+
+        function updateWithdrawTimerDisplay() {
+            let now = Date.now();
+            let statusBox = document.getElementById('withdrawStatusBox');
+            let withdrawBtn = document.getElementById('withdrawBtn');
+
+            if (withdrawEndTimestamp > now) {
+                let diffSecs = Math.floor((withdrawEndTimestamp - now) / 1000);
+                let hrs = Math.floor(diffSecs / 3600);
+                let mins = Math.floor((diffSecs % 3600) / 60);
+                let secs = diffSecs % 60;
+                
+                let timeStr = "";
+                if (hrs > 0) {
+                    timeStr = (hrs < 10 ? '0' : '') + hrs + ':' + (mins < 10 ? '0' : '') + mins + ':' + (secs < 10 ? '0' : '') + secs;
+                } else {
+                    timeStr = (mins < 10 ? '0' : '') + mins + ':' + (secs < 10 ? '0' : '') + secs;
+                }
+
+                document.getElementById('withdrawCountdown').innerText = timeStr;
+                
+                statusBox.style.display = 'block';
+                withdrawBtn.innerText = 'Withdrawal Cooldown Active';
+                withdrawBtn.style.background = '#777';
+                return true;
+            } else {
+                statusBox.style.display = 'none';
+                withdrawBtn.innerText = 'Withdraw via WhatsApp (Min 500)';
+                withdrawBtn.style.background = '#ffcc00';
+                return false;
             }
         }
 
@@ -345,7 +389,6 @@
 
             // 1) Check 1-Hour Rest if Balance > 1000
             if (balance > 1000) {
-                // Agar pehle se timer set nahi hai, toh 1 ghanta (3600,000 ms) set kar do
                 if (restEndTimestamp <= now) {
                     restEndTimestamp = now + (3600 * 1000);
                     localStorage.setItem('chicken_rest_end', restEndTimestamp);
@@ -363,7 +406,6 @@
                 document.getElementById('modalTitle').innerText = "⏳ 1 Hour Rest Period Active!";
                 document.getElementById('modalReason').innerHTML = `Aapka balance <b>Rs. 1000 se zyada</b> ho chuka hai! Is liye aapko 1 ghante ke rest par laga diya gaya hai. Mazeed game tab hi start hogi jab rest timer khatam ho jaye.<br><br><b>Remaining Rest Time: <span style="color:#ff4444; font-size:18px;">${timeStr}</span></b>`;
                 
-                // Hide referral progress elements during rest
                 document.getElementById('referralProgressContainer').style.display = 'none';
                 document.getElementById('actionButtonsDiv').style.display = 'none';
                 document.getElementById('modalHint').style.display = 'none';
@@ -387,7 +429,6 @@
                     document.getElementById('modalReason').innerHTML = `Aapka balance <b>Rs. 500 ya usse zyada</b> ho chuka hai! Mazeed game khelne aur withdraw karne ke liye apne invitees ke Rs. 100 deposit ki WhatsApp request approve karwana lazmi hai.`;
                 }
 
-                // Show referral progress elements
                 document.getElementById('referralProgressContainer').style.display = 'block';
                 document.getElementById('actionButtonsDiv').style.display = 'block';
                 document.getElementById('modalHint').style.display = 'block';
@@ -395,10 +436,10 @@
                 document.getElementById('referralModal').style.display = 'flex';
                 gameStarted = false;
                 isPaused = true;
-                return true; // Locked
+                return true; 
             } else {
                 document.getElementById('referralModal').style.display = 'none';
-                return false; // Unlocked
+                return false; 
             }
         }
 
@@ -427,16 +468,18 @@
             }
         }
 
-        // Continuous Background Lock & Rest Check (Har 1 second mein check karega)
+        // Continuous Background Loop (Har 1 second mein timers update honge)
         setInterval(function() {
             updateRestTimerDisplay();
+            updateWithdrawTimerDisplay();
             checkGameLockCondition();
         }, 1000);
 
         // Initial check on load
         checkGameLockCondition();
+        updateWithdrawTimerDisplay();
 
-        // Minimum Withdrawal Function (Min Rs. 500)
+        // Withdrawal Function (1st withdrawal 24h, next withdrawals 1 min)
         function requestWithdrawal() {
             let accountNo = document.getElementById('withdrawAccount').value.trim();
 
@@ -450,13 +493,37 @@
                 return;
             }
 
+            if (updateWithdrawTimerDisplay()) {
+                alert("⏳ Cooldown period active hai. Thoda intezaar karein.");
+                return;
+            }
+
             if (checkGameLockCondition()) {
                 alert("Game ya withdrawal lock hai! Pehle conditions poori karein.");
                 return;
             }
 
+            let waitTimeMs;
+            let waitMessageText;
+
+            if (!firstWithdrawalDone) {
+                // 1st Withdrawal: 24 Hours
+                waitTimeMs = 24 * 3600 * 1000;
+                firstWithdrawalDone = true;
+                localStorage.setItem('chicken_first_withdrawal_done', 'true');
+                waitMessageText = "Please process my payment within 24 hours.";
+            } else {
+                // Next Withdrawals: 1 Minute
+                waitTimeMs = 60 * 1000;
+                waitMessageText = "Please process my payment within 1 minute.";
+            }
+
+            withdrawEndTimestamp = Date.now() + waitTimeMs;
+            localStorage.setItem('chicken_withdraw_end', withdrawEndTimestamp);
+            updateWithdrawTimerDisplay();
+
             let adminPhone = '923034902887';
-            let message = `Hello Admin, I want to withdraw my winnings.%0AAmount: Rs. ${balance}%0AAccount No: ${accountNo}%0APlease process my payment.`;
+            let message = `Hello Admin, I want to withdraw my winnings.%0AAmount: Rs. ${balance}%0AAccount No: ${accountNo}%0A${waitMessageText}`;
             let whatsappURL = `https://wa.me/${adminPhone}?text=${message}`;
 
             window.open(whatsappURL, '_blank');
@@ -555,7 +622,6 @@
             isPaused = false;
             isGameOver = false;
             score = 0;
-            document.getElementById('currentScore').innerText = score;
             document.getElementById('pauseBtn').innerText = 'Pause';
             obstacle.x = 400;
             obstacle.speed = 5;
@@ -606,7 +672,6 @@
             if (obstacle.x < -20) {
                 obstacle.x = 400;
                 score += 10;
-                document.getElementById('currentScore').innerText = score;
                 if(score % 50 === 0) obstacle.speed += 0.5;
             }
 
