@@ -120,8 +120,9 @@
 
     <!-- Deposit & Promo Code Section -->
     <div class="section">
-        <h3>Deposit & Promo Code</h3>
-        <p style="font-size: 13px; margin-bottom: 5px;">Send JazzCash/EasyPaisa to: <b>0300-1234567</b></p>
+        <h3>Deposit via JazzCash</h3>
+        <p style="font-size: 13px; margin-bottom: 5px;">Send amount to JazzCash Account:</p>
+        <p style="font-size: 16px; color: #ffcc00; text-align: center; font-weight: bold; margin-bottom: 8px;">03034902887</p>
         <p style="font-size: 12px; color: #aaa; margin-bottom: 10px;">Payment ke baad mujhse code le kar yahan enter karein:</p>
         <input type="text" id="promoInput" placeholder="Enter Promo Code (e.g. JUTT500)">
         <button class="btn" style="width:100%; margin: 5px 0;" onclick="redeemPromo()">Redeem Code</button>
@@ -261,7 +262,6 @@
                 return;
             }
 
-            // Aap yahan apni marzi ke codes aur unki amount set kar sakte hain
             let addedAmount = 0;
 
             if (code === 'JUTT100') {
