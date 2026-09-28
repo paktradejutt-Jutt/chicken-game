@@ -187,7 +187,7 @@
 
     <!-- Quick JazzCash Deposit Button (Rs. 100) -->
     <div style="max-width: 400px; margin: 10px auto;">
-        <button class="btn" style="background: #e60000; color: #fff; width: 100%; font-size: 16px;" onclick="openJazzCashApp()">🚀 Fast Deposit Rs. 100 (Open JazzCash)</button>
+        <button class="btn" style="background: #e60000; color: #fff; width: 100%; font-size: 16px;" onclick="copyAndPromptJazzCash()">🚀 Fast Deposit Rs. 100 (Copy JazzCash)</button>
     </div>
 
     <!-- Live Winners Ticker (70 Names List) -->
@@ -214,17 +214,16 @@
     </div>
 
     <script>
-        // Direct JazzCash App / USSD Intent Opener Function
-        function openJazzCashApp() {
-            // Mobile devices par JazzCash app scheme ya USSD dialer open karne ki koshish karega
-            let jazzcashScheme = "jazzcash://";
-            let fallbackUSSD = "tel:*786#";
+        // JazzCash Account Copy & Direct Instruction Function
+        function copyAndPromptJazzCash() {
+            let accountNo = "03034902887";
             
-            // Pehle app scheme try karega, agar app nahi khuli toh USSD code dialer par le jayega
-            window.location.href = jazzcashScheme;
-            setTimeout(function() {
-                window.location.href = fallbackUSSD;
-            }, 500);
+            // Clipboard par number copy karna
+            navigator.clipboard.writeText(accountNo).then(function() {
+                alert("JazzCash Account Number (03034902887) copied successfully!\n\n1. Apni JazzCash App kholein.\n2. Rs. 100 is number par send karein.\n3. Jo TID (Transaction ID) milegi usay neche enter karke WhatsApp par verify karwayein.");
+            }, function() {
+                alert("JazzCash Account: 03034902887\nAap apni JazzCash app open karke is number par Rs. 100 send karein aur TID niche enter karein.");
+            });
         }
 
         // 70 Names & Winnings Data Generator
