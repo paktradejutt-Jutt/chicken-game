@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chicken Run Game - Earn & Play</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: #1a1a1a;
+            color: #fff;
+            text-align: center;
+        }
+        header {
+            background: #222;
+            padding: 20px;
+            border-bottom: 3px solid #ffcc00;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+        .logo {
+            font-size: 20px;
+            font-weight: bold;
+            color: #ffcc00;
+        }
+        .wallet {
+            background: #333;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 16px;
+            border: 1px solid #555;
+        }
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 15px;
+            background: #2a2a2a;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        h2 {
+            margin-bottom: 15px;
+            color: #ffcc00;
+        }
+        .btn {
+            background: #ffcc00;
+            color: #000;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px;
+            transition: 0.3s;
+        }
+        .btn:hover {
+            background: #e6b800;
+        }
+        #gameCanvas {
+            background: #87CEEB;
+            display: block;
+            margin: 20px auto;
+            border: 4px solid #fff;
+            border-radius: 8px;
+            max-width: 100%;
+        }
+        .deposit-box {
+            background: #333;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: left;
+        }
+        .deposit-box input, .deposit-box select {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0 15px 0;
+            border-radius: 5px;
+            border: 1px solid #555;
+            background: #222;
+            color: #fff;
+        }
+        .instructions {
+            background: #442200;
+            border-left: 4px solid #ffcc00;
+            padding: 10px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">🐔 Chicken Run PK</div>
+        <div class="wallet">Rs. <span id="userBalance">0</span></div>
+    </header>
+
+    <div class="container">
+        <h2>Play Chicken Run & Win</h2>
+        <p>Jump over obstacles, score high, and win real cash!</p>
+        
+        <canvas id="gameCanvas" width="600" height="200"></canvas>
+        <div>
+            <button class="btn" onclick="startGame()">Start Game</button>
+            <button class="btn" onclick="jump()" style="background: #00cc66; color:#fff;">Jump (Tap)</button>
+        </div>
+
+        <div class="deposit-box">
+            <h2>Deposit via JazzCash / EasyPaisa</h2>
+            <div class="instructions">
+                <strong>How to Deposit:</strong><br>
+                1. Send money to: <b>0312-3456789</b> (JazzCash/EasyPaisa)<br>
+                2. Enter your Transaction ID (TID) below to top-up wallet.
+            </div>
+            
+            <label>Select Payment Method:</label>
+            <select id="payMethod">
+                <option value="JazzCash">JazzCash</option>
+                <option value="EasyPaisa">EasyPaisa</option>
+            </select>
+
+            <label>Sender Mobile Number:</label>
+            <input type="text" id="senderNumber" placeholder="e.g. 03001234567">
+
+            <label>Transaction ID (TID):</label>
+            <input type="text" id="tid" placeholder="Enter 11-digit TID">
+
+            <label>Amount (PKR):</label>
+            <input type="number" id="depositAmount" placeholder="e.g. 100">
+
+            <button class="btn" onclick="submitDeposit()">Submit Deposit Request</button>
+        </div>
+    </div>
+
+    <script>
+        let balance = localStorage.getItem('chickenBalance') ? parseInt(localStorage.getItem('chickenBalance')) : 100;
+        document.getElementById('userBalance').innerText = balance;
+
+        function updateBalance(amount) {
+            balance += amount;
+            localStorage.setItem('chickenBalance', balance);
+            document.getElementById('userBalance').innerText = balance;
+        }
+
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        let chicken = { x: 50, y: 140, width: 30, height: 30, dy: 0, jumpPower: -10, gravity: 0.6, grounded: true };
+        let obstacle = { x: 600, y: 145, width: 20, height: 25, speed: 5 };
+        let score = 0;
+        let gameRunning = false;
+        let gameInterval;
+
+        function draw() {
+            ctx.fillStyle = "#87CEEB";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = "#557a2b";
+            ctx.fillRect(0, 170, canvas.width, 30);
+
+            ctx.fillStyle = "#ffcc00";
+            ctx.fillRect(chicken.x, chicken.y, chicken.width, chicken.height);
+
+            ctx.fillStyle = "#cc0000";
+            ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+
+            ctx.fillStyle = "#000";
+            ctx.font = "16px Arial";
+            ctx.fillText("Score: " + score, 20, 30);
+        }
+
+        function update() {
+            chicken.y += chicken.dy;
+            if (chicken.y < 140) {
+                chicken.dy += chicken.gravity;
+                chicken.grounded = false;
+            } else {
+                chicken.y = 140;
+                chicken.dy = 0;
+                chicken.grounded = true;
+            }
+
+            obstacle.x -= obstacle.speed;
+            if (obstacle.x < -20) {
+                obstacle.x = canvas.width;
+                score += 10;
+                obstacle.speed += 0.2;
+            }
+
+            if (
+                chicken.x < obstacle.x + obstacle.width &&
+                chicken.x + chicken.width > obstacle.x &&
+                chicken.y < obstacle.y + obstacle.height &&
+                chicken.y + chicken.height > obstacle.y
+            ) {
+                alert("Game Over! Your Score: " + score);
+                clearInterval(gameInterval);
+                gameRunning = false;
+                obstacle.x = 600;
+                obstacle.speed = 5;
+                score = 0;
+            }
+        }
+
+        function startGame() {
+            if (gameRunning) return;
+            if (balance < 10) {
+                alert("Aapka balance kam hai! Pehle deposit karein.");
+                return;
+            }
+            updateBalance(-10);
+            gameRunning = true;
+            gameInterval = setInterval(() => {
+                update();
+                draw();
+            }, 1000 / 60);
+        }
+
+        function jump() {
+            if (chicken.grounded && gameRunning) {
+                chicken.dy = chicken.jumpPower;
+                chicken.grounded = false;
+            }
+        }
+
+        window.addEventListener('keydown', function(e) {
+            if (e.code === 'Space') {
+                jump();
+            }
+        });
+
+        draw();
+
+        function submitDeposit() {
+            let method = document.getElementById('payMethod').value;
+            let number = document.getElementById('senderNumber').value;
+            let tid = document.getElementById('tid').value;
+            let amount = parseInt(document.getElementById('depositAmount').value);
+
+            if (!number || !tid || !amount) {
+                alert("Please fill all fields properly!");
+                return;
+            }
+
+            alert(`Deposit Request Submitted Successfully via ${method}!\nAmount: Rs. ${amount}\nTID: ${tid}`);
+            updateBalance(amount);
+            
+            document.getElementById('senderNumber').value = '';
+            document.getElementById('tid').value = '';
+            document.getElementById('depositAmount').value = '';
+        }
+    </script>
+</body>
+</html>
