@@ -75,6 +75,24 @@
         .btn:active {
             background: #e6b800;
         }
+        .control-panel {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 10px auto;
+            max-width: 400px;
+        }
+        .ctrl-btn {
+            flex: 1;
+            padding: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        #startBtn { background: #4CAF50; color: #fff; }
+        #pauseBtn { background: #ff9800; color: #fff; }
         .section {
             background: #252525;
             padding: 15px;
@@ -116,6 +134,13 @@
     <div class="game-container">
         <canvas id="gameCanvas" width="400" height="250"></canvas>
     </div>
+
+    <!-- Game Control Buttons -->
+    <div class="control-panel" style="max-width: 400px; margin: 10px auto;">
+        <button class="ctrl-btn" id="startBtn" onclick="startGame()">Start Game</button>
+        <button class="ctrl-btn" id="pauseBtn" onclick="togglePause()">Pause</button>
+    </div>
+
     <button class="btn" id="jumpBtn" onclick="makeJump()">JUMP (TAP HERE)</button>
 
     <!-- Deposit & TID Section -->
@@ -142,6 +167,7 @@
         let score = 0;
         let gravity = 0.6;
         let gameStarted = false;
+        let isPaused = false;
         let isGameOver = false;
 
         let chicken = {
@@ -163,10 +189,7 @@
         };
 
         function makeJump() {
-            if (!gameStarted || isGameOver) {
-                startGame();
-                return;
-            }
+            if (!gameStarted || isPaused || isGameOver) return;
 
             if (chicken.grounded) {
                 chicken.dy = chicken.jumpPower;
@@ -176,17 +199,31 @@
 
         function startGame() {
             gameStarted = true;
+            isPaused = false;
             isGameOver = false;
             score = 0;
             document.getElementById('currentScore').innerText = score;
+            document.getElementById('pauseBtn').innerText = 'Pause';
             obstacle.x = 400;
             obstacle.speed = 5;
             chicken.y = 170;
             chicken.dy = 0;
         }
 
-        function update() {
+        function togglePause() {
             if (!gameStarted || isGameOver) return;
+            
+            isPaused = !isPaused;
+            let pauseBtn = document.getElementById('pauseBtn');
+            if (isPaused) {
+                pauseBtn.innerText = 'Resume';
+            } else {
+                pauseBtn.innerText = 'Pause';
+            }
+        }
+
+        function update() {
+            if (!gameStarted || isPaused || isGameOver) return;
 
             chicken.dy += gravity;
             chicken.y += chicken.dy;
@@ -246,8 +283,17 @@
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 ctx.fillStyle = '#fff';
-                ctx.font = '20px Arial';
-                ctx.fillText('Tap Jump to Start Game', 85, 120);
+                ctx.font = '18px Arial';
+                ctx.fillText('Click "Start Game" to Play', 95, 120);
+            }
+
+            // Pause Screen Overlay
+            if (isPaused) {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#ffcc00';
+                ctx.font = '22px Arial';
+                ctx.fillText('Game Paused', 130, 130);
             }
 
             // Game Over Screen Overlay
@@ -258,7 +304,7 @@
                 ctx.font = '18px Arial';
                 let earnedReward = Math.floor(score / 10);
                 ctx.fillText(`Game Over! Earned: Rs. ${earnedReward}`, 35, 100);
-                ctx.fillText('Tap Jump to Restart', 105, 140);
+                ctx.fillText('Click Start Game to Retry', 90, 140);
             }
         }
 
@@ -280,11 +326,8 @@
                 return;
             }
 
-            // Aapka WhatsApp Number yahan set hai (international format mein without +)
             let adminPhone = '923034902887'; 
-
             let message = `Hello Admin, I have sent Rs. ${amount} via JazzCash to your account (03034902887).%0ATID: ${tid}%0APlease verify and add balance to my account.`;
-
             let whatsappURL = `https://wa.me/${adminPhone}?text=${message}`;
 
             window.open(whatsappURL, '_blank');
