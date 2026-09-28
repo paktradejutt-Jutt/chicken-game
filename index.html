@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chicken Run Game - Earn & Play</title>
+    <title>Chicken Run PK - Play & Earn</title>
     <style>
         * {
             margin: 0;
@@ -15,186 +15,182 @@
             background: #1a1a1a;
             color: #fff;
             text-align: center;
+            padding: 10px;
         }
         header {
             background: #222;
-            padding: 20px;
-            border-bottom: 3px solid #ffcc00;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-left: 20px;
-            padding-right: 20px;
-        }
-        .logo {
-            font-size: 20px;
-            font-weight: bold;
-            color: #ffcc00;
-        }
-        .wallet {
-            background: #333;
-            padding: 8px 15px;
-            border-radius: 8px;
-            font-size: 16px;
-            border: 1px solid #555;
-        }
-        .container {
-            max-width: 900px;
-            margin: 20px auto;
             padding: 15px;
-            background: #2a2a2a;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-        }
-        h2 {
+            border-radius: 10px;
             margin-bottom: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+        h1 {
             color: #ffcc00;
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        .wallet-box {
+            background: #333;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-around;
+            font-size: 16px;
+        }
+        .wallet-box span {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        .game-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            height: 250px;
+            background: #2b2b2b;
+            margin: 0 auto;
+            border: 3px solid #ffcc00;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+            background: linear-gradient(to bottom, #4a90e2, #50e3c2);
+            width: 100%;
+            height: 100%;
         }
         .btn {
             background: #ffcc00;
             color: #000;
-            padding: 12px 25px;
             border: none;
-            border-radius: 6px;
-            font-size: 16px;
+            padding: 12px 20px;
+            font-size: 18px;
             font-weight: bold;
+            border-radius: 8px;
             cursor: pointer;
-            margin: 10px;
-            transition: 0.3s;
+            margin: 10px 5px;
+            width: 90%;
+            max-width: 400px;
         }
-        .btn:hover {
+        .btn:active {
             background: #e6b800;
         }
-        #gameCanvas {
-            background: #87CEEB;
-            display: block;
-            margin: 20px auto;
-            border: 4px solid #fff;
-            border-radius: 8px;
-            max-width: 100%;
-        }
-        .deposit-box {
-            background: #333;
-            padding: 20px;
-            border-radius: 8px;
-            margin-top: 20px;
+        .section {
+            background: #252525;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px auto;
+            max-width: 400px;
             text-align: left;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
-        .deposit-box input, .deposit-box select {
+        .section h3 {
+            color: #ffcc00;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        input, select {
             width: 100%;
             padding: 10px;
-            margin: 8px 0 15px 0;
+            margin: 8px 0;
             border-radius: 5px;
-            border: 1px solid #555;
-            background: #222;
+            border: 1px solid #444;
+            background: #1a1a1a;
             color: #fff;
-        }
-        .instructions {
-            background: #442200;
-            border-left: 4px solid #ffcc00;
-            padding: 10px;
-            margin-bottom: 15px;
-            font-size: 14px;
         }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="logo">🐔 Chicken Run PK</div>
-        <div class="wallet">Rs. <span id="userBalance">0</span></div>
+        <h1>🐔 Chicken Run PK</h1>
+        <p>Play Game & Deposit via JazzCash / EasyPaisa</p>
     </header>
 
-    <div class="container">
-        <h2>Play Chicken Run & Win</h2>
-        <p>Jump over obstacles, score high, and win real cash!</p>
-        
-        <canvas id="gameCanvas" width="600" height="200"></canvas>
-        <div>
-            <button class="btn" onclick="startGame()">Start Game</button>
-            <button class="btn" onclick="jump()" style="background: #00cc66; color:#fff;">Jump (Tap)</button>
-        </div>
+    <div class="wallet-box">
+        <div>Balance: <span id="userBalance">Rs. 0</span></div>
+        <div>Score: <span id="currentScore">0</span></div>
+    </div>
 
-        <div class="deposit-box">
-            <h2>Deposit via JazzCash / EasyPaisa</h2>
-            <div class="instructions">
-                <strong>How to Deposit:</strong><br>
-                1. Send money to: <b>0312-3456789</b> (JazzCash/EasyPaisa)<br>
-                2. Enter your Transaction ID (TID) below to top-up wallet.
-            </div>
-            
-            <label>Select Payment Method:</label>
-            <select id="payMethod">
-                <option value="JazzCash">JazzCash</option>
-                <option value="EasyPaisa">EasyPaisa</option>
-            </select>
+    <!-- Game Area -->
+    <div class="game-container">
+        <canvas id="gameCanvas" width="400" height="250"></canvas>
+    </div>
+    <button class="btn" id="jumpBtn" onclick="makeJump()">JUMP (TAP HERE)</button>
 
-            <label>Sender Mobile Number:</label>
-            <input type="text" id="senderNumber" placeholder="e.g. 03001234567">
-
-            <label>Transaction ID (TID):</label>
-            <input type="text" id="tid" placeholder="Enter 11-digit TID">
-
-            <label>Amount (PKR):</label>
-            <input type="number" id="depositAmount" placeholder="e.g. 100">
-
-            <button class="btn" onclick="submitDeposit()">Submit Deposit Request</button>
-        </div>
+    <!-- Deposit Section -->
+    <div class="section">
+        <h3>Deposit Funds</h3>
+        <p style="font-size: 13px; margin-bottom: 5px;">Send amount to JazzCash/EasyPaisa: <b>0300-1234567</b></p>
+        <select id="depositMethod">
+            <option value="JazzCash">JazzCash</option>
+            <option value="EasyPaisa">EasyPaisa</option>
+        </select>
+        <input type="number" id="depositAmount" placeholder="Enter Amount (PKR)">
+        <input type="text" id="tidInput" placeholder="Enter 11-digit TID / Transaction ID">
+        <button class="btn" style="width:100%; margin: 5px 0;" onclick="submitDeposit()">Submit Deposit</button>
     </div>
 
     <script>
-        let balance = localStorage.getItem('chickenBalance') ? parseInt(localStorage.getItem('chickenBalance')) : 100;
-        document.getElementById('userBalance').innerText = balance;
+        // LocalStorage Wallet Setup
+        let balance = localStorage.getItem('chicken_balance') ? parseInt(localStorage.getItem('chicken_balance')) : 100;
+        document.getElementById('userBalance').innerText = 'Rs. ' + balance;
 
-        function updateBalance(amount) {
-            balance += amount;
-            localStorage.setItem('chickenBalance', balance);
-            document.getElementById('userBalance').innerText = balance;
-        }
+        // Game Canvas Logic
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
 
-        const canvas = document.getElementById("gameCanvas");
-        const ctx = canvas.getContext("2d");
-
-        let chicken = { x: 50, y: 140, width: 30, height: 30, dy: 0, jumpPower: -10, gravity: 0.6, grounded: true };
-        let obstacle = { x: 600, y: 145, width: 20, height: 25, speed: 5 };
         let score = 0;
-        let gameRunning = false;
-        let gameInterval;
+        let isJumping = false;
+        let gravity = 0.6;
+        let isGameOver = false;
 
-        function draw() {
-            ctx.fillStyle = "#87CEEB";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        let chicken = {
+            x: 50,
+            y: 170,
+            width: 30,
+            height: 30,
+            dy: 0,
+            jumpPower: -10,
+            grounded: true
+        };
 
-            ctx.fillStyle = "#557a2b";
-            ctx.fillRect(0, 170, canvas.width, 30);
+        let obstacle = {
+            x: 400,
+            y: 175,
+            width: 20,
+            height: 25,
+            speed: 5
+        };
 
-            ctx.fillStyle = "#ffcc00";
-            ctx.fillRect(chicken.x, chicken.y, chicken.width, chicken.height);
-
-            ctx.fillStyle = "#cc0000";
-            ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
-
-            ctx.fillStyle = "#000";
-            ctx.font = "16px Arial";
-            ctx.fillText("Score: " + score, 20, 30);
+        function makeJump() {
+            if (chicken.grounded && !isGameOver) {
+                chicken.dy = chicken.jumpPower;
+                chicken.grounded = false;
+            }
+            if (isGameOver) {
+                resetGame();
+            }
         }
 
         function update() {
+            if (isGameOver) return;
+
+            chicken.dy += gravity;
             chicken.y += chicken.dy;
-            if (chicken.y < 140) {
-                chicken.dy += chicken.gravity;
-                chicken.grounded = false;
-            } else {
-                chicken.y = 140;
+
+            if (chicken.y > 170) {
+                chicken.y = 170;
                 chicken.dy = 0;
                 chicken.grounded = true;
             }
 
             obstacle.x -= obstacle.speed;
             if (obstacle.x < -20) {
-                obstacle.x = canvas.width;
+                obstacle.x = 400;
                 score += 10;
-                obstacle.speed += 0.2;
+                document.getElementById('currentScore').innerText = score;
+                if(score % 50 === 0) obstacle.speed += 0.5;
             }
 
             if (
@@ -203,61 +199,74 @@
                 chicken.y < obstacle.y + obstacle.height &&
                 chicken.y + chicken.height > obstacle.y
             ) {
-                alert("Game Over! Your Score: " + score);
-                clearInterval(gameInterval);
-                gameRunning = false;
-                obstacle.x = 600;
-                obstacle.speed = 5;
-                score = 0;
+                isGameOver = true;
             }
         }
 
-        function startGame() {
-            if (gameRunning) return;
-            if (balance < 10) {
-                alert("Aapka balance kam hai! Pehle deposit karein.");
-                return;
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Ground
+            ctx.fillStyle = '#333';
+            ctx.fillRect(0, 200, canvas.width, 50);
+
+            // Chicken
+            ctx.font = '28px Arial';
+            ctx.fillText('🐔', chicken.x - 4, chicken.y + 24);
+
+            // Obstacle
+            ctx.fillStyle = '#ff4444';
+            ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+
+            if (isGameOver) {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#fff';
+                ctx.font = '20px Arial';
+                ctx.fillText('Game Over! Tap Jump to Restart', 40, 120);
             }
-            updateBalance(-10);
-            gameRunning = true;
-            gameInterval = setInterval(() => {
-                update();
-                draw();
-            }, 1000 / 60);
         }
 
-        function jump() {
-            if (chicken.grounded && gameRunning) {
-                chicken.dy = chicken.jumpPower;
-                chicken.grounded = false;
-            }
+        function loop() {
+            update();
+            draw();
+            requestAnimationFrame(loop);
         }
 
-        window.addEventListener('keydown', function(e) {
-            if (e.code === 'Space') {
-                jump();
-            }
-        });
+        function resetGame() {
+            isGameOver = false;
+            score = 0;
+            document.getElementById('currentScore').innerText = score;
+            obstacle.x = 400;
+            obstacle.speed = 5;
+            chicken.y = 170;
+            chicken.dy = 0;
+        }
 
-        draw();
+        loop();
 
         function submitDeposit() {
-            let method = document.getElementById('payMethod').value;
-            let number = document.getElementById('senderNumber').value;
-            let tid = document.getElementById('tid').value;
-            let amount = parseInt(document.getElementById('depositAmount').value);
+            let amount = document.getElementById('depositAmount').value;
+            let tid = document.getElementById('tidInput').value;
+            let method = document.getElementById('depositMethod').value;
 
-            if (!number || !tid || !amount) {
-                alert("Please fill all fields properly!");
+            if(!amount || !tid) {
+                alert('Please enter amount and valid TID!');
                 return;
             }
 
-            alert(`Deposit Request Submitted Successfully via ${method}!\nAmount: Rs. ${amount}\nTID: ${tid}`);
-            updateBalance(amount);
-            
-            document.getElementById('senderNumber').value = '';
-            document.getElementById('tid').value = '';
+            if(tid.length < 8) {
+                alert('Please enter a valid Transaction ID (TID)');
+                return;
+            }
+
+            balance += parseInt(amount);
+            localStorage.setItem('chicken_balance', balance);
+            document.getElementById('userBalance').innerText = 'Rs. ' + balance;
+
+            alert(`Deposit Request of Rs. ${amount} via ${method} submitted successfully!`);
             document.getElementById('depositAmount').value = '';
+            document.getElementById('tidInput').value = '';
         }
     </script>
 </body>
