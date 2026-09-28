@@ -227,8 +227,8 @@
     <!-- Referral Lock Popup Modal -->
     <div class="modal-overlay" id="referralModal">
         <div class="modal-box">
-            <h2>🔒 Play Time & Limit Reached!</h2>
-            <p id="modalReason">Aapka total game play time 5 minutes se zyada ho chuka hai (ya balance Rs. 1000 ho gaya hai)! Mazeed game khelne ke liye kam az kam <b>5 logon ko apne referral link se invite</b> karwana lazmi hai.</p>
+            <h2>🔒 Game Locked / Limit Reached!</h2>
+            <p id="modalReason">Aapka total play time 5 minutes se zyada ho chuka hai (ya balance Rs. 500 se zyada ho gaya hai)! Mazeed game khelne ke liye kam az kam <b>5 logon ko apne referral link se invite</b> karwana lazmi hai.</p>
             
             <div class="progress-bar-bg">
                 <div class="progress-bar-fill" id="progressFill"></div>
@@ -270,12 +270,12 @@
         <button class="btn" style="background: #e60000; color: #fff; width: 100%; font-size: 16px;" onclick="copyAndPromptJazzCash()">🚀 Fast Deposit Rs. 100 (Copy JazzCash)</button>
     </div>
 
-    <!-- Withdrawal Section (Minimum Rs. 1000 Option) -->
+    <!-- Withdrawal Section (Minimum Rs. 500 Option) -->
     <div class="section" style="text-align: center;">
         <h3>💰 Request Withdrawal</h3>
-        <p style="font-size: 13px; color: #aaa; margin-bottom: 10px;">Minimum Withdrawal Limit: <b style="color: #4CAF50;">Rs. 1000</b></p>
+        <p style="font-size: 13px; color: #aaa; margin-bottom: 10px;">Minimum Withdrawal Limit: <b style="color: #4CAF50;">Rs. 500</b></p>
         <input type="text" id="withdrawAccount" placeholder="Enter JazzCash / EasyPaisa Account No">
-        <button class="btn" style="width:100%; margin: 5px 0; background: #ffcc00; color: #000;" onclick="requestWithdrawal()">Withdraw via WhatsApp (Min 1000)</button>
+        <button class="btn" style="width:100%; margin: 5px 0; background: #ffcc00; color: #000;" onclick="requestWithdrawal()">Withdraw via WhatsApp (Min 500)</button>
     </div>
 
     <!-- Live Winners Ticker List -->
@@ -305,7 +305,6 @@
         // LocalStorage Setup
         let balance = localStorage.getItem('chicken_balance') ? parseInt(localStorage.getItem('chicken_balance')) : 100;
         let referralCount = localStorage.getItem('chicken_referral_count') ? parseInt(localStorage.getItem('chicken_referral_count')) : 0;
-        // Total played seconds tracking (Target: 300 seconds = 5 minutes)
         let totalPlayedSeconds = localStorage.getItem('chicken_play_time') ? parseInt(localStorage.getItem('chicken_play_time')) : 0;
         const maxPlaySeconds = 300; 
 
@@ -320,8 +319,8 @@
         updateTimerDisplay();
 
         function checkGameLockCondition() {
-            // Lock condition: Agar balance >= 1000 YA totalPlayedSeconds >= 300 (5 mins) AUR referrals < 5 hon
-            if ((balance >= 1000 || totalPlayedSeconds >= maxPlaySeconds) && referralCount < 5) {
+            // Updated limit: Balance >= 500 OR totalPlayedSeconds >= 300 (5 mins)
+            if ((balance >= 500 || totalPlayedSeconds >= maxPlaySeconds) && referralCount < 5) {
                 let percentage = (referralCount / 5) * 100;
                 document.getElementById('progressFill').style.width = percentage + '%';
                 document.getElementById('progressText').innerText = referralCount + ' / 5 Referrals Completed';
@@ -329,10 +328,14 @@
                 if (totalPlayedSeconds >= maxPlaySeconds) {
                     document.getElementById('modalReason').innerHTML = `Aapka total game play time <b>5 minutes</b> mukammal ho chuka hai! Mazeed game khelne ke liye kam az kam <b>5 logon ko apne referral link se invite</b> karwana lazmi hai.`;
                 } else {
-                    document.getElementById('modalReason').innerHTML = `Aapka balance <b>Rs. 1000 ya usse zyada</b> ho chuka hai! Mazeed game khelne aur withdraw karne ke liye kam az kam <b>5 logon ko apne referral link se invite</b> karwana lazmi hai.`;
+                    document.getElementById('modalReason').innerHTML = `Aapka balance <b>Rs. 500 ya usse zyada</b> ho chuka hai! Mazeed game khelne aur withdraw karne ke liye kam az kam <b>5 logon ko apne referral link se invite</b> karwana lazmi hai.`;
                 }
 
                 document.getElementById('referralModal').style.display = 'flex';
+                
+                // Game ko foran pause/stop kar dein
+                gameStarted = false;
+                isPaused = true;
                 return true; // Locked
             } else {
                 document.getElementById('referralModal').style.display = 'none';
@@ -364,10 +367,15 @@
             }
         }
 
+        // Continuous Background Lock Check (Har 1 second mein check karega)
+        setInterval(function() {
+            checkGameLockCondition();
+        }, 1000);
+
         // Initial check on load
         checkGameLockCondition();
 
-        // Minimum Withdrawal Function (Min Rs. 1000)
+        // Minimum Withdrawal Function (Min Rs. 500)
         function requestWithdrawal() {
             let accountNo = document.getElementById('withdrawAccount').value.trim();
 
@@ -376,8 +384,8 @@
                 return;
             }
 
-            if (balance < 1000) {
-                alert(`❌ Withdrawal Failed! Minimum withdrawal limit Rs. 1000 hai. Aapka current balance Rs. ${balance} hai.`);
+            if (balance < 500) {
+                alert(`❌ Withdrawal Failed! Minimum withdrawal limit Rs. 500 hai. Aapka current balance Rs. ${balance} hai.`);
                 return;
             }
 
@@ -506,7 +514,7 @@
             }
         }
 
-        // Gameplay Timer Loop (har 1 second mein chalega jab game active ho)
+        // Gameplay Timer Loop
         setInterval(function() {
             if (gameStarted && !isPaused && !isGameOver) {
                 if (totalPlayedSeconds < maxPlaySeconds) {
@@ -565,7 +573,6 @@
             localStorage.setItem('chicken_balance', balance);
             document.getElementById('userBalance').innerText = 'Rs. ' + balance;
 
-            // Check conditions after game over
             checkGameLockCondition();
         }
 
@@ -585,7 +592,7 @@
             ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
 
             // Initial Start Screen Overlay
-            if (!gameStarted) {
+            if (!gameStarted && !isPaused && !checkGameLockCondition()) {
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 ctx.fillStyle = '#fff';
@@ -594,7 +601,7 @@
             }
 
             // Pause Screen Overlay
-            if (isPaused) {
+            if (isPaused && !checkGameLockCondition()) {
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 ctx.fillStyle = '#ffcc00';
