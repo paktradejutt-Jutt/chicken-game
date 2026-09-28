@@ -37,7 +37,7 @@
             max-width: 400px;
             display: flex;
             justify-content: space-around;
-            font-size: 16px;
+            font-size: 15px;
         }
         .wallet-box span {
             color: #4CAF50;
@@ -224,11 +224,11 @@
 </head>
 <body>
 
-    <!-- Referral Lock Popup Modal (Shown only if Balance >= 1000 and referrals < 5) -->
+    <!-- Referral Lock Popup Modal -->
     <div class="modal-overlay" id="referralModal">
         <div class="modal-box">
-            <h2>🔒 Withdrawal & Play Limit Reached!</h2>
-            <p>Aapka balance <b>Rs. 1000 ya usse zyada</b> ho chuka hai! Mazeed game khelne aur withdraw karne ke liye kam az kam <b>5 logon ko apne referral link se invite</b> karwana lazmi hai.</p>
+            <h2>🔒 Play Time & Limit Reached!</h2>
+            <p id="modalReason">Aapka total game play time 5 minutes se zyada ho chuka hai (ya balance Rs. 1000 ho gaya hai)! Mazeed game khelne ke liye kam az kam <b>5 logon ko apne referral link se invite</b> karwana lazmi hai.</p>
             
             <div class="progress-bar-bg">
                 <div class="progress-bar-fill" id="progressFill"></div>
@@ -248,6 +248,7 @@
 
     <div class="wallet-box">
         <div>Balance: <span id="userBalance">Rs. 0</span></div>
+        <div>Time: <span id="timerDisplay">05:00</span></div>
         <div>Score: <span id="currentScore">0</span></div>
     </div>
 
@@ -301,18 +302,36 @@
     </div>
 
     <script>
-        // LocalStorage Wallet Setup (Demo initial balance 100)
+        // LocalStorage Setup
         let balance = localStorage.getItem('chicken_balance') ? parseInt(localStorage.getItem('chicken_balance')) : 100;
         let referralCount = localStorage.getItem('chicken_referral_count') ? parseInt(localStorage.getItem('chicken_referral_count')) : 0;
-        
+        // Total played seconds tracking (Target: 300 seconds = 5 minutes)
+        let totalPlayedSeconds = localStorage.getItem('chicken_play_time') ? parseInt(localStorage.getItem('chicken_play_time')) : 0;
+        const maxPlaySeconds = 300; 
+
         document.getElementById('userBalance').innerText = 'Rs. ' + balance;
 
+        function updateTimerDisplay() {
+            let remaining = Math.max(0, maxPlaySeconds - totalPlayedSeconds);
+            let mins = Math.floor(remaining / 60);
+            let secs = remaining % 60;
+            document.getElementById('timerDisplay').innerText = (mins < 10 ? '0' : '') + mins + ':' + (secs < 10 ? '0' : '') + secs;
+        }
+        updateTimerDisplay();
+
         function checkGameLockCondition() {
-            // Agar balance Rs. 1000 ya usse zyada hai AUR referrals 5 se kam hain, toh game lock ho gi
-            if (balance >= 1000 && referralCount < 5) {
+            // Lock condition: Agar balance >= 1000 YA totalPlayedSeconds >= 300 (5 mins) AUR referrals < 5 hon
+            if ((balance >= 1000 || totalPlayedSeconds >= maxPlaySeconds) && referralCount < 5) {
                 let percentage = (referralCount / 5) * 100;
                 document.getElementById('progressFill').style.width = percentage + '%';
                 document.getElementById('progressText').innerText = referralCount + ' / 5 Referrals Completed';
+                
+                if (totalPlayedSeconds >= maxPlaySeconds) {
+                    document.getElementById('modalReason').innerHTML = `Aapka total game play time <b>5 minutes</b> mukammal ho chuka hai! Mazeed game khelne ke liye kam az kam <b>5 logon ko apne referral link se invite</b> karwana lazmi hai.`;
+                } else {
+                    document.getElementById('modalReason').innerHTML = `Aapka balance <b>Rs. 1000 ya usse zyada</b> ho chuka hai! Mazeed game khelne aur withdraw karne ke liye kam az kam <b>5 logon ko apne referral link se invite</b> karwana lazmi hai.`;
+                }
+
                 document.getElementById('referralModal').style.display = 'flex';
                 return true; // Locked
             } else {
@@ -459,7 +478,7 @@
 
         function startGame() {
             if (checkGameLockCondition()) {
-                alert("Aapka balance Rs. 1000 ya usse zyada hai. Pehle 5 referrals mukammal karein!");
+                alert("Aapka time ya balance limit poori ho chuki hai. Pehle 5 referrals mukammal karein!");
                 return;
             }
 
@@ -486,6 +505,21 @@
                 pauseBtn.innerText = 'Pause';
             }
         }
+
+        // Gameplay Timer Loop (har 1 second mein chalega jab game active ho)
+        setInterval(function() {
+            if (gameStarted && !isPaused && !isGameOver) {
+                if (totalPlayedSeconds < maxPlaySeconds) {
+                    totalPlayedSeconds++;
+                    localStorage.setItem('chicken_play_time', totalPlayedSeconds);
+                    updateTimerDisplay();
+
+                    if (totalPlayedSeconds >= maxPlaySeconds) {
+                        checkGameLockCondition();
+                    }
+                }
+            }
+        }, 1000);
 
         function update() {
             if (!gameStarted || isPaused || isGameOver) return;
@@ -531,7 +565,7 @@
             localStorage.setItem('chicken_balance', balance);
             document.getElementById('userBalance').innerText = 'Rs. ' + balance;
 
-            // Check if earnings reached 1000 after game over
+            // Check conditions after game over
             checkGameLockCondition();
         }
 
