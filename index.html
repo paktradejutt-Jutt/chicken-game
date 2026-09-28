@@ -89,7 +89,7 @@
             margin-bottom: 10px;
             text-align: center;
         }
-        input, select {
+        input {
             width: 100%;
             padding: 10px;
             margin: 8px 0;
@@ -104,7 +104,7 @@
 
     <header>
         <h1>🐔 Chicken Run PK</h1>
-        <p>Play Game & Earn Balance</p>
+        <p>Play Game & Redeem Promo Balance</p>
     </header>
 
     <div class="wallet-box">
@@ -118,17 +118,13 @@
     </div>
     <button class="btn" id="jumpBtn" onclick="makeJump()">JUMP (TAP HERE)</button>
 
-    <!-- Deposit Section -->
+    <!-- Deposit & Promo Code Section -->
     <div class="section">
-        <h3>Deposit Funds</h3>
-        <p style="font-size: 13px; margin-bottom: 5px;">Send amount to JazzCash/EasyPaisa: <b>0300-1234567</b></p>
-        <select id="depositMethod">
-            <option value="JazzCash">JazzCash</option>
-            <option value="EasyPaisa">EasyPaisa</option>
-        </select>
-        <input type="number" id="depositAmount" placeholder="Enter Amount (PKR)">
-        <input type="text" id="tidInput" placeholder="Enter 11-digit TID / Transaction ID">
-        <button class="btn" style="width:100%; margin: 5px 0;" onclick="submitDeposit()">Submit Deposit</button>
+        <h3>Deposit & Promo Code</h3>
+        <p style="font-size: 13px; margin-bottom: 5px;">Send JazzCash/EasyPaisa to: <b>0300-1234567</b></p>
+        <p style="font-size: 12px; color: #aaa; margin-bottom: 10px;">Payment ke baad mujhse code le kar yahan enter karein:</p>
+        <input type="text" id="promoInput" placeholder="Enter Promo Code (e.g. JUTT500)">
+        <button class="btn" style="width:100%; margin: 5px 0;" onclick="redeemPromo()">Redeem Code</button>
     </div>
 
     <script>
@@ -204,7 +200,6 @@
         }
 
         function handleGameOverEarnings() {
-            // Har 10 score ka 1 Rupya balance mein add hoga
             let earnedReward = Math.floor(score / 10);
             if (earnedReward > 0) {
                 balance += earnedReward;
@@ -257,28 +252,35 @@
 
         loop();
 
-        function submitDeposit() {
-            let amount = document.getElementById('depositAmount').value;
-            let tid = document.getElementById('tidInput').value;
-            let method = document.getElementById('depositMethod').value;
+        // Promo Code Logic
+        function redeemPromo() {
+            let code = document.getElementById('promoInput').value.trim().toUpperCase();
 
-            if(!amount || !tid) {
-                alert('Please enter amount and valid TID!');
+            if(!code) {
+                alert('Please enter a promo code!');
                 return;
             }
 
-            if(tid.length < 8) {
-                alert('Please enter a valid Transaction ID (TID)');
+            // Aap yahan apni marzi ke codes aur unki amount set kar sakte hain
+            let addedAmount = 0;
+
+            if (code === 'JUTT100') {
+                addedAmount = 100;
+            } else if (code === 'JUTT500') {
+                addedAmount = 500;
+            } else if (code === 'WIN1000') {
+                addedAmount = 1000;
+            } else {
+                alert('Invalid or Expired Promo Code!');
                 return;
             }
 
-            balance += parseInt(amount);
+            balance += addedAmount;
             localStorage.setItem('chicken_balance', balance);
             document.getElementById('userBalance').innerText = 'Rs. ' + balance;
 
-            alert(`Deposit Request of Rs. ${amount} via ${method} submitted successfully!`);
-            document.getElementById('depositAmount').value = '';
-            document.getElementById('tidInput').value = '';
+            alert(`Congratulations! Rs. ${addedAmount} added to your balance successfully.`);
+            document.getElementById('promoInput').value = '';
         }
     </script>
 </body>
