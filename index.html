@@ -104,7 +104,7 @@
 
     <header>
         <h1>🐔 Chicken Run PK</h1>
-        <p>Play Game & Deposit via JazzCash / EasyPaisa</p>
+        <p>Play Game & Earn Balance</p>
     </header>
 
     <div class="wallet-box">
@@ -136,12 +136,10 @@
         let balance = localStorage.getItem('chicken_balance') ? parseInt(localStorage.getItem('chicken_balance')) : 100;
         document.getElementById('userBalance').innerText = 'Rs. ' + balance;
 
-        // Game Canvas Logic
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
         let score = 0;
-        let isJumping = false;
         let gravity = 0.6;
         let isGameOver = false;
 
@@ -193,6 +191,7 @@
                 if(score % 50 === 0) obstacle.speed += 0.5;
             }
 
+            // Collision detection
             if (
                 chicken.x < obstacle.x + obstacle.width &&
                 chicken.x + chicken.width > obstacle.x &&
@@ -200,6 +199,17 @@
                 chicken.y + chicken.height > obstacle.y
             ) {
                 isGameOver = true;
+                handleGameOverEarnings();
+            }
+        }
+
+        function handleGameOverEarnings() {
+            // Har 10 score ka 1 Rupya balance mein add hoga
+            let earnedReward = Math.floor(score / 10);
+            if (earnedReward > 0) {
+                balance += earnedReward;
+                localStorage.setItem('chicken_balance', balance);
+                document.getElementById('userBalance').innerText = 'Rs. ' + balance;
             }
         }
 
@@ -222,8 +232,10 @@
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 ctx.fillStyle = '#fff';
-                ctx.font = '20px Arial';
-                ctx.fillText('Game Over! Tap Jump to Restart', 40, 120);
+                ctx.font = '18px Arial';
+                let earnedReward = Math.floor(score / 10);
+                ctx.fillText(`Game Over! Earned: Rs. ${earnedReward}`, 35, 100);
+                ctx.fillText('Tap Jump to Restart', 80, 140);
             }
         }
 
