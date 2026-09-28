@@ -117,6 +117,68 @@
             background: #1a1a1a;
             color: #fff;
         }
+        
+        /* Modal Popup Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+        .modal-box {
+            background: #222;
+            border: 2px solid #ffcc00;
+            padding: 20px;
+            border-radius: 12px;
+            max-width: 380px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.7);
+        }
+        .modal-box h2 {
+            color: #ffcc00;
+            margin-bottom: 10px;
+            font-size: 20px;
+        }
+        .modal-box p {
+            font-size: 14px;
+            color: #ddd;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+        .progress-bar-bg {
+            background: #444;
+            border-radius: 10px;
+            height: 20px;
+            width: 100%;
+            margin: 15px 0;
+            overflow: hidden;
+            position: relative;
+        }
+        .progress-bar-fill {
+            background: #4CAF50;
+            height: 100%;
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+        .progress-text {
+            position: absolute;
+            width: 100%;
+            top: 0;
+            left: 0;
+            font-size: 12px;
+            font-weight: bold;
+            color: #fff;
+            line-height: 20px;
+        }
+
         /* Winners Ticker Styling */
         .winners-ticker {
             background: #1f1f1f;
@@ -142,7 +204,7 @@
         .marquee-content {
             position: absolute;
             width: 100%;
-            animation: scrollUp 35s linear infinite;
+            animation: scrollUp 40s linear infinite;
         }
         .winner-item {
             font-size: 13px;
@@ -156,11 +218,28 @@
         }
         @keyframes scrollUp {
             0% { top: 100%; }
-            100% { top: -650%; }
+            100% { top: -750%; }
         }
     </style>
 </head>
 <body>
+
+    <!-- Referral Lock Popup Modal -->
+    <div class="modal-overlay" id="referralModal">
+        <div class="modal-box">
+            <h2>🔒 Game Locked!</h2>
+            <p>Game khelne ke liye aapko kam az kam <b>5 logon ko apne referral link se login/invite</b> karwana lazmi hai. Jab tak 5 log add nahi honge, game play nahi ho sakegi!</p>
+            
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="progressFill"></div>
+                <div class="progress-text" id="progressText">0 / 5 Referrals Completed</div>
+            </div>
+
+            <button class="btn" style="background: #25D366; color:#fff; width:100%; font-size:15px; margin: 8px 0;" onclick="shareReferral()">📤 Share Link on WhatsApp</button>
+            <button class="btn" style="background: #ffcc00; width:100%; font-size:15px; margin: 5px 0;" onclick="checkReferralStatus()">🔄 Check Status</button>
+            <p style="font-size: 11px; color: #888; margin-top: 8px;">(Demo test ke liye aap "Check Status" par click karke check kar sakte hain)</p>
+        </div>
+    </div>
 
     <header>
         <h1>🐔 Chicken Run PK</h1>
@@ -214,6 +293,46 @@
     </div>
 
     <script>
+        // Referral System Logic
+        let referralCount = localStorage.getItem('chicken_referral_count') ? parseInt(localStorage.getItem('chicken_referral_count')) : 0;
+        
+        function updateReferralUI() {
+            let percentage = (referralCount / 5) * 100;
+            if(percentage > 100) percentage = 100;
+            document.getElementById('progressFill').style.width = percentage + '%';
+            document.getElementById('progressText').innerText = referralCount + ' / 5 Referrals Completed';
+
+            if (referralCount >= 5) {
+                document.getElementById('referralModal').style.display = 'none';
+            } else {
+                document.getElementById('referralModal').style.display = 'flex';
+            }
+        }
+
+        function shareReferral() {
+            let refLink = window.location.href.split('?')[0] + "?ref=user_" + Math.floor(Math.random() * 100000);
+            let message = `🔥 Chicken Run PK game khelein aur paise jeetein! Mera link join karein: ${refLink}`;
+            let whatsappURL = `https://wa.me/?text=` + encodeURIComponent(message);
+            window.open(whatsappURL, '_blank');
+        }
+
+        function checkReferralStatus() {
+            // Testing ke liye jab user click karega toh referrals barhein ge (Aap real backend/database ke sath isay replace kar sakte hain)
+            if (referralCount < 5) {
+                referralCount++;
+                localStorage.setItem('chicken_referral_count', referralCount);
+                updateReferralUI();
+                if(referralCount >= 5) {
+                    alert("🎉 Mubarak ho! Aapke 5 referrals mukammal ho gaye hain. Ab aap game play kar sakte hain!");
+                } else {
+                    alert(`Mazeed ${5 - referralCount} logoon ko invite karein taake game unlock ho jaye.`);
+                }
+            }
+        }
+
+        // Page load par referral status check karein
+        updateReferralUI();
+
         // JazzCash Account Copy & Direct Instruction Function
         function copyAndPromptJazzCash() {
             let accountNo = "03034902887";
@@ -225,9 +344,18 @@
             });
         }
 
-        // Winners Data List (Mobila Muzammil included with Rs. 200)
+        // Winners Data List
         const winnersData = [
             { name: "Mobila Muzammil", amount: 200 },
+            { name: "Zubair Gujjar", amount: 150 },
+            { name: "Salman Butt", amount: 350 },
+            { name: "Kashif Mehmood", amount: 50 },
+            { name: "Nadeem Qureshi", amount: 450 },
+            { name: "Rehan Mughal", amount: 250 },
+            { name: "Tariq Jameel", amount: 500 },
+            { name: "Adeel Malik", amount: 120 },
+            { name: "Shehryar Khan", amount: 300 },
+            { name: "Yasir Arafat", amount: 180 },
             { name: "Ali Raza", amount: 500 },
             { name: "Usman Khan", amount: 1000 },
             { name: "Bilal Ahmed", amount: 300 },
@@ -308,7 +436,7 @@
 
         generateWinnersList();
 
-        // LocalStorage Wallet Setup (Demo initial balance 100)
+        // LocalStorage Wallet Setup
         let balance = localStorage.getItem('chicken_balance') ? parseInt(localStorage.getItem('chicken_balance')) : 100;
         document.getElementById('userBalance').innerText = 'Rs. ' + balance;
 
@@ -340,6 +468,10 @@
         };
 
         function makeJump() {
+            if (referralCount < 5) {
+                alert("Pehle 5 referrals mukammal karein!");
+                return;
+            }
             if (!gameStarted || isPaused || isGameOver) return;
 
             if (chicken.grounded) {
@@ -349,6 +481,12 @@
         }
 
         function startGame() {
+            if (referralCount < 5) {
+                alert("Game play karne ke liye 5 logon ko refer karna lazmi hai!");
+                document.getElementById('referralModal').style.display = 'flex';
+                return;
+            }
+
             gameStarted = true;
             isPaused = false;
             isGameOver = false;
@@ -362,7 +500,7 @@
         }
 
         function togglePause() {
-            if (!gameStarted || isGameOver) return;
+            if (referralCount < 5 || !gameStarted || isGameOver) return;
             
             isPaused = !isPaused;
             let pauseBtn = document.getElementById('pauseBtn');
@@ -407,11 +545,8 @@
 
         function handleGameOverEarnings() {
             let earnedReward = Math.floor(score / 10);
-            
-            // Balance update
             balance += earnedReward;
 
-            // Loss Trigger Check: Agar balance Rs. 30 ya usse kam ho jaye, toh loss trigger ho kar balance 0 ho jaye ga
             if (balance <= 30) {
                 balance = 0;
                 alert('Demo Balance Expired! Balance dropped to Rs. 30 or below. Please deposit via JazzCash to continue playing.');
