@@ -157,8 +157,8 @@
     </div>
 
     <script>
-        // LocalStorage Wallet Setup
-        let balance = localStorage.getItem('chicken_balance') ? parseInt(localStorage.getItem('chicken_balance')) : 0;
+        // LocalStorage Wallet Setup (Demo initial balance 100)
+        let balance = localStorage.getItem('chicken_balance') ? parseInt(localStorage.getItem('chicken_balance')) : 100;
         document.getElementById('userBalance').innerText = 'Rs. ' + balance;
 
         const canvas = document.getElementById('gameCanvas');
@@ -256,11 +256,18 @@
 
         function handleGameOverEarnings() {
             let earnedReward = Math.floor(score / 10);
-            if (earnedReward > 0) {
-                balance += earnedReward;
-                localStorage.setItem('chicken_balance', balance);
-                document.getElementById('userBalance').innerText = 'Rs. ' + balance;
+            
+            // Balance update
+            balance += earnedReward;
+
+            // Loss Trigger Check: Agar balance Rs. 30 ya usse kam ho jaye, toh loss trigger ho kar balance 0 ho jaye ga
+            if (balance <= 30) {
+                balance = 0;
+                alert('Demo Balance Expired! Balance dropped to Rs. 30 or below. Please deposit via JazzCash to continue playing.');
             }
+
+            localStorage.setItem('chicken_balance', balance);
+            document.getElementById('userBalance').innerText = 'Rs. ' + balance;
         }
 
         function draw() {
@@ -301,10 +308,15 @@
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 ctx.fillStyle = '#fff';
-                ctx.font = '18px Arial';
+                ctx.font = '16px Arial';
                 let earnedReward = Math.floor(score / 10);
-                ctx.fillText(`Game Over! Earned: Rs. ${earnedReward}`, 35, 100);
-                ctx.fillText('Click Start Game to Retry', 90, 140);
+                ctx.fillText(`Game Over! Earned: Rs. ${earnedReward}`, 60, 90);
+                if (balance === 0) {
+                    ctx.fillStyle = '#ff4444';
+                    ctx.fillText('Balance Expired (Rs. 0)! Please Deposit.', 45, 120);
+                }
+                ctx.fillStyle = '#fff';
+                ctx.fillText('Click Start Game to Retry', 95, 150);
             }
         }
 
