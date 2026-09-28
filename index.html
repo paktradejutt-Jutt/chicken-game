@@ -37,7 +37,7 @@
             max-width: 400px;
             display: flex;
             justify-content: space-around;
-            font-size: 15px;
+            font-size: 14px;
         }
         .wallet-box span {
             color: #4CAF50;
@@ -227,17 +227,20 @@
     <!-- Referral Lock Popup Modal -->
     <div class="modal-overlay" id="referralModal">
         <div class="modal-box">
-            <h2>🔒 Game Locked / Limit Reached!</h2>
+            <h2 id="modalTitle">🔒 Game Locked / Limit Reached!</h2>
             <p id="modalReason">Limit poori ho chuki hai! Jab tak aapke <b>5 invitees Rs. 100 ka deposit karke aapko WhatsApp par request bhejenge aur aap unhein approve karenge</b>, tab tak game lock rahegi.</p>
             
-            <div class="progress-bar-bg">
+            <div class="progress-bar-bg" id="referralProgressContainer">
                 <div class="progress-bar-fill" id="progressFill"></div>
                 <div class="progress-text" id="progressText">0 / 5 Approved Deposits Completed</div>
             </div>
 
-            <button class="btn" style="background: #25D366; color:#fff; width:100%; font-size:15px; margin: 8px 0;" onclick="shareReferral()">📤 Share Link on WhatsApp</button>
-            <button class="btn" style="background: #ffcc00; width:100%; font-size:15px; margin: 5px 0;" onclick="checkReferralStatus()">🔄 Check Status / Sync Approval</button>
-            <p style="font-size: 11px; color: #888; margin-top: 8px;">(Aap deposit verify karne ke baad yahan click karke approval count update kar sakte hain)</p>
+            <div id="actionButtonsDiv">
+                <button class="btn" style="background: #25D366; color:#fff; width:100%; font-size:15px; margin: 8px 0;" onclick="shareReferral()">📤 Share Link on WhatsApp</button>
+                <button class="btn" style="background: #ffcc00; width:100%; font-size:15px; margin: 5px 0;" onclick="checkReferralStatus()">🔄 Check Status / Sync Approval</button>
+            </div>
+            
+            <p style="font-size: 11px; color: #888; margin-top: 8px;" id="modalHint">(Aap deposit verify karne ke baad yahan click karke approval count update kar sakte hain)</p>
         </div>
     </div>
 
@@ -249,7 +252,7 @@
     <div class="wallet-box">
         <div>Balance: <span id="userBalance">Rs. 0</span></div>
         <div>Time: <span id="timerDisplay">05:00</span></div>
-        <div>Score: <span id="currentScore">0</span></div>
+        <div>Rest: <span id="restTimerDisplay" style="color: #ff4444;">00:00</span></div>
     </div>
 
     <!-- Game Area -->
@@ -308,6 +311,9 @@
         let totalPlayedSeconds = localStorage.getItem('chicken_play_time') ? parseInt(localStorage.getItem('chicken_play_time')) : 0;
         const maxPlaySeconds = 300; 
 
+        // 1 Hour Rest Timer Setup (3600 seconds)
+        let restEndTimestamp = localStorage.getItem('chicken_rest_end') ? parseInt(localStorage.getItem('chicken_rest_end')) : 0;
+
         document.getElementById('userBalance').innerText = 'Rs. ' + balance;
 
         function updateTimerDisplay() {
@@ -318,22 +324,75 @@
         }
         updateTimerDisplay();
 
+        function updateRestTimerDisplay() {
+            let now = Date.now();
+            if (restEndTimestamp > now) {
+                let diffSecs = Math.floor((restEndTimestamp - now) / 1000);
+                let hrs = Math.floor(diffSecs / 3600);
+                let mins = Math.floor((diffSecs % 3600) / 60);
+                let secs = diffSecs % 60;
+                document.getElementById('restTimerDisplay').innerText = 
+                    (hrs < 10 ? '0' : '') + hrs + ':' + (mins < 10 ? '0' : '') + mins + ':' + (secs < 10 ? '0' : '') + secs;
+                return true; // Rest active
+            } else {
+                document.getElementById('restTimerDisplay').innerText = "00:00:00";
+                return false; // Rest over
+            }
+        }
+
         function checkGameLockCondition() {
-            // Lock condition: Time 5 mins ya balance >= 500 ho, AUR approvedDeposits < 5 hon
+            let now = Date.now();
+
+            // 1) Check 1-Hour Rest if Balance > 1000
+            if (balance > 1000) {
+                // Agar pehle se timer set nahi hai, toh 1 ghanta (3600,000 ms) set kar do
+                if (restEndTimestamp <= now) {
+                    restEndTimestamp = now + (3600 * 1000);
+                    localStorage.setItem('chicken_rest_end', restEndTimestamp);
+                }
+            }
+
+            // Agar rest active hai
+            if (restEndTimestamp > now) {
+                let diffSecs = Math.floor((restEndTimestamp - now) / 1000);
+                let hrs = Math.floor(diffSecs / 3600);
+                let mins = Math.floor((diffSecs % 3600) / 60);
+                let secs = diffSecs % 60;
+                let timeStr = (hrs < 10 ? '0' : '') + hrs + ':' + (mins < 10 ? '0' : '') + mins + ':' + (secs < 10 ? '0' : '') + secs;
+
+                document.getElementById('modalTitle').innerText = "⏳ 1 Hour Rest Period Active!";
+                document.getElementById('modalReason').innerHTML = `Aapka balance <b>Rs. 1000 se zyada</b> ho chuka hai! Is liye aapko 1 ghante ke rest par laga diya gaya hai. Mazeed game tab hi start hogi jab rest timer khatam ho jaye.<br><br><b>Remaining Rest Time: <span style="color:#ff4444; font-size:18px;">${timeStr}</span></b>`;
+                
+                // Hide referral progress elements during rest
+                document.getElementById('referralProgressContainer').style.display = 'none';
+                document.getElementById('actionButtonsDiv').style.display = 'none';
+                document.getElementById('modalHint').style.display = 'none';
+
+                document.getElementById('referralModal').style.display = 'flex';
+                gameStarted = false;
+                isPaused = true;
+                return true;
+            }
+
+            // 2) Check Referral/Time Limit Condition (Balance >= 500 OR Time >= 5 mins)
             if ((balance >= 500 || totalPlayedSeconds >= maxPlaySeconds) && approvedDeposits < 5) {
                 let percentage = (approvedDeposits / 5) * 100;
                 document.getElementById('progressFill').style.width = percentage + '%';
                 document.getElementById('progressText').innerText = approvedDeposits + ' / 5 Approved Deposits Completed';
                 
+                document.getElementById('modalTitle').innerText = "🔒 Game Locked / Limit Reached!";
                 if (totalPlayedSeconds >= maxPlaySeconds) {
                     document.getElementById('modalReason').innerHTML = `Aapka total game play time <b>5 minutes</b> mukammal ho chuka hai! Mazeed game khelne ke liye apne invitees ke Rs. 100 deposit ki WhatsApp request approve karwana lazmi hai.`;
                 } else {
                     document.getElementById('modalReason').innerHTML = `Aapka balance <b>Rs. 500 ya usse zyada</b> ho chuka hai! Mazeed game khelne aur withdraw karne ke liye apne invitees ke Rs. 100 deposit ki WhatsApp request approve karwana lazmi hai.`;
                 }
 
+                // Show referral progress elements
+                document.getElementById('referralProgressContainer').style.display = 'block';
+                document.getElementById('actionButtonsDiv').style.display = 'block';
+                document.getElementById('modalHint').style.display = 'block';
+
                 document.getElementById('referralModal').style.display = 'flex';
-                
-                // Game ko foran pause/stop kar dein
                 gameStarted = false;
                 isPaused = true;
                 return true; // Locked
@@ -368,8 +427,9 @@
             }
         }
 
-        // Continuous Background Lock Check (Har 1 second mein check karega)
+        // Continuous Background Lock & Rest Check (Har 1 second mein check karega)
         setInterval(function() {
+            updateRestTimerDisplay();
             checkGameLockCondition();
         }, 1000);
 
@@ -391,7 +451,7 @@
             }
 
             if (checkGameLockCondition()) {
-                alert("Withdrawal lock hai! Pehle 5 approved deposits mukammal karein.");
+                alert("Game ya withdrawal lock hai! Pehle conditions poori karein.");
                 return;
             }
 
@@ -487,7 +547,7 @@
 
         function startGame() {
             if (checkGameLockCondition()) {
-                alert("Aapka time ya balance limit poori ho chuki hai. Pehle 5 approved deposits mukammal karein!");
+                alert("Aapka balance 1000 se zyada hone ki wajah se rest mode par hai ya referrals baqi hain!");
                 return;
             }
 
