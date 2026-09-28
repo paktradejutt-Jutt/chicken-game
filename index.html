@@ -228,16 +228,16 @@
     <div class="modal-overlay" id="referralModal">
         <div class="modal-box">
             <h2>🔒 Game Locked / Limit Reached!</h2>
-            <p id="modalReason">Aapka total play time 5 minutes se zyada ho chuka hai (ya balance Rs. 500 se zyada ho gaya hai)! Mazeed game khelne ke liye kam az kam <b>5 logon ko apne referral link se invite</b> karwana lazmi hai.</p>
+            <p id="modalReason">Limit poori ho chuki hai! Jab tak aapke <b>5 invitees Rs. 100 ka deposit karke aapko WhatsApp par request bhejenge aur aap unhein approve karenge</b>, tab tak game lock rahegi.</p>
             
             <div class="progress-bar-bg">
                 <div class="progress-bar-fill" id="progressFill"></div>
-                <div class="progress-text" id="progressText">0 / 5 Referrals Completed</div>
+                <div class="progress-text" id="progressText">0 / 5 Approved Deposits Completed</div>
             </div>
 
             <button class="btn" style="background: #25D366; color:#fff; width:100%; font-size:15px; margin: 8px 0;" onclick="shareReferral()">📤 Share Link on WhatsApp</button>
-            <button class="btn" style="background: #ffcc00; width:100%; font-size:15px; margin: 5px 0;" onclick="checkReferralStatus()">🔄 Check Status</button>
-            <p style="font-size: 11px; color: #888; margin-top: 8px;">(Demo test ke liye "Check Status" par click karke referrals barha sakte hain)</p>
+            <button class="btn" style="background: #ffcc00; width:100%; font-size:15px; margin: 5px 0;" onclick="checkReferralStatus()">🔄 Check Status / Sync Approval</button>
+            <p style="font-size: 11px; color: #888; margin-top: 8px;">(Aap deposit verify karne ke baad yahan click karke approval count update kar sakte hain)</p>
         </div>
     </div>
 
@@ -304,7 +304,7 @@
     <script>
         // LocalStorage Setup
         let balance = localStorage.getItem('chicken_balance') ? parseInt(localStorage.getItem('chicken_balance')) : 100;
-        let referralCount = localStorage.getItem('chicken_referral_count') ? parseInt(localStorage.getItem('chicken_referral_count')) : 0;
+        let approvedDeposits = localStorage.getItem('chicken_approved_deposits') ? parseInt(localStorage.getItem('chicken_approved_deposits')) : 0;
         let totalPlayedSeconds = localStorage.getItem('chicken_play_time') ? parseInt(localStorage.getItem('chicken_play_time')) : 0;
         const maxPlaySeconds = 300; 
 
@@ -319,16 +319,16 @@
         updateTimerDisplay();
 
         function checkGameLockCondition() {
-            // Updated limit: Balance >= 500 OR totalPlayedSeconds >= 300 (5 mins)
-            if ((balance >= 500 || totalPlayedSeconds >= maxPlaySeconds) && referralCount < 5) {
-                let percentage = (referralCount / 5) * 100;
+            // Lock condition: Time 5 mins ya balance >= 500 ho, AUR approvedDeposits < 5 hon
+            if ((balance >= 500 || totalPlayedSeconds >= maxPlaySeconds) && approvedDeposits < 5) {
+                let percentage = (approvedDeposits / 5) * 100;
                 document.getElementById('progressFill').style.width = percentage + '%';
-                document.getElementById('progressText').innerText = referralCount + ' / 5 Referrals Completed';
+                document.getElementById('progressText').innerText = approvedDeposits + ' / 5 Approved Deposits Completed';
                 
                 if (totalPlayedSeconds >= maxPlaySeconds) {
-                    document.getElementById('modalReason').innerHTML = `Aapka total game play time <b>5 minutes</b> mukammal ho chuka hai! Mazeed game khelne ke liye kam az kam <b>5 logon ko apne referral link se invite</b> karwana lazmi hai.`;
+                    document.getElementById('modalReason').innerHTML = `Aapka total game play time <b>5 minutes</b> mukammal ho chuka hai! Mazeed game khelne ke liye apne invitees ke Rs. 100 deposit ki WhatsApp request approve karwana lazmi hai.`;
                 } else {
-                    document.getElementById('modalReason').innerHTML = `Aapka balance <b>Rs. 500 ya usse zyada</b> ho chuka hai! Mazeed game khelne aur withdraw karne ke liye kam az kam <b>5 logon ko apne referral link se invite</b> karwana lazmi hai.`;
+                    document.getElementById('modalReason').innerHTML = `Aapka balance <b>Rs. 500 ya usse zyada</b> ho chuka hai! Mazeed game khelne aur withdraw karne ke liye apne invitees ke Rs. 100 deposit ki WhatsApp request approve karwana lazmi hai.`;
                 }
 
                 document.getElementById('referralModal').style.display = 'flex';
@@ -344,25 +344,26 @@
         }
 
         function shareReferral() {
-            let refLink = window.location.href.split('?')[0] + "?ref=user_" + Math.floor(Math.random() * 100000);
-            let message = `🔥 Chicken Run PK game khelein aur paise jeetein! Mera link join karein: ${refLink}`;
+            let myUniqueId = "user_" + Math.floor(Math.random() * 100000);
+            let refLink = window.location.href.split('?')[0] + "?ref=" + myUniqueId;
+            let message = `🔥 Chicken Run PK game khelein aur paise jeetein! Rs. 100 deposit karke mujhe WhatsApp par TID bhejein taake main approve kar sakoon: ${refLink}`;
             let whatsappURL = `https://wa.me/?text=` + encodeURIComponent(message);
             window.open(whatsappURL, '_blank');
         }
 
         function checkReferralStatus() {
-            if (referralCount < 5) {
-                referralCount++;
-                localStorage.setItem('chicken_referral_count', referralCount);
-                let percentage = (referralCount / 5) * 100;
+            if (approvedDeposits < 5) {
+                approvedDeposits++;
+                localStorage.setItem('chicken_approved_deposits', approvedDeposits);
+                let percentage = (approvedDeposits / 5) * 100;
                 document.getElementById('progressFill').style.width = percentage + '%';
-                document.getElementById('progressText').innerText = referralCount + ' / 5 Referrals Completed';
+                document.getElementById('progressText').innerText = approvedDeposits + ' / 5 Approved Deposits Completed';
 
-                if(referralCount >= 5) {
-                    alert("🎉 Mubarak ho! Aapke 5 referrals mukammal ho gaye hain. Ab aap mazeed game play aur withdraw kar sakte hain!");
+                if(approvedDeposits >= 5) {
+                    alert("🎉 Mubarak ho! Aapke 5 approved deposits mukammal ho gaye hain. Ab aap mazeed game play aur withdraw kar sakte hain!");
                     document.getElementById('referralModal').style.display = 'none';
                 } else {
-                    alert(`Mazeed ${5 - referralCount} logoon ko invite karein taake limit unlock ho jaye.`);
+                    alert(`Mazeed ${5 - approvedDeposits} approvals baqi hain taake limit unlock ho jaye.`);
                 }
             }
         }
@@ -390,7 +391,7 @@
             }
 
             if (checkGameLockCondition()) {
-                alert("Withdrawal lock hai! Pehle 5 referrals mukammal karein.");
+                alert("Withdrawal lock hai! Pehle 5 approved deposits mukammal karein.");
                 return;
             }
 
@@ -486,7 +487,7 @@
 
         function startGame() {
             if (checkGameLockCondition()) {
-                alert("Aapka time ya balance limit poori ho chuki hai. Pehle 5 referrals mukammal karein!");
+                alert("Aapka time ya balance limit poori ho chuki hai. Pehle 5 approved deposits mukammal karein!");
                 return;
             }
 
@@ -645,7 +646,7 @@
             }
 
             let adminPhone = '923034902887'; 
-            let message = `Hello Admin, I have sent Rs. ${amount} via JazzCash to your account (03034902887).%0ATID: ${tid}%0APlease verify and add balance to my account.`;
+            let message = `Hello Admin, I have sent Rs. ${amount} via JazzCash to your account (03034902887).%0ATID: ${tid}%0APlease verify and approve my request.`;
             let whatsappURL = `https://wa.me/${adminPhone}?text=${message}`;
 
             window.open(whatsappURL, '_blank');
