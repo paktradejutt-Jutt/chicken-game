@@ -542,7 +542,7 @@
 
         // Winners Data List
         const winnersData = [
-            { name: "Mobila Muzammil", amount: 1200 },
+            { name: "Qasim", amount: 1200 },
             { name: "Zubair Gujjar", amount: 1500 },
             { name: "Salman Butt", amount: 2350 },
             { name: "Kashif Mehmood", amount: 1050 },
@@ -673,7 +673,7 @@
                 if (blastAnimation.timer <= 0) {
                     blastAnimation.active = false;
                 }
-                return; // Game over hone par positions freeze rakho jab tak blast show ho
+                return; 
             }
 
             if (isGameOver) return;
@@ -707,7 +707,7 @@
                 blastAnimation.active = true;
                 blastAnimation.x = obstacle.x;
                 blastAnimation.y = obstacle.y;
-                blastAnimation.timer = 40; // Kitni dair blast show ho
+                blastAnimation.timer = 40;
 
                 handleGameOverEarnings();
             }
@@ -767,7 +767,7 @@
                 ctx.fillText('Game Paused', 130, 130);
             }
 
-            // Game Over Screen Overlay (Jab blast khatam ho jaye tab show ho)
+            // Game Over Screen Overlay
             if (isGameOver && !blastAnimation.active) {
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
