@@ -542,7 +542,7 @@
 
         // Winners Data List
         const winnersData = [
-            { name: "Qasim", amount: 1200 },
+            { name: "Mobila Muzammil", amount: 1200 },
             { name: "Zubair Gujjar", amount: 1500 },
             { name: "Salman Butt", amount: 2350 },
             { name: "Kashif Mehmood", amount: 1050 },
@@ -602,6 +602,13 @@
             speed: 5
         };
 
+        let blastAnimation = {
+            active: false,
+            x: 0,
+            y: 0,
+            timer: 0
+        };
+
         function makeJump() {
             if (checkGameLockCondition()) return;
             if (!gameStarted || isPaused || isGameOver) return;
@@ -621,6 +628,7 @@
             gameStarted = true;
             isPaused = false;
             isGameOver = false;
+            blastAnimation.active = false;
             score = 0;
             document.getElementById('pauseBtn').innerText = 'Pause';
             obstacle.x = 400;
@@ -657,7 +665,18 @@
         }, 1000);
 
         function update() {
-            if (!gameStarted || isPaused || isGameOver) return;
+            if (!gameStarted || isPaused) return;
+
+            // Agar blast chal raha hai toh timer kam karo
+            if (blastAnimation.active) {
+                blastAnimation.timer--;
+                if (blastAnimation.timer <= 0) {
+                    blastAnimation.active = false;
+                }
+                return; // Game over hone par positions freeze rakho jab tak blast show ho
+            }
+
+            if (isGameOver) return;
 
             chicken.dy += gravity;
             chicken.y += chicken.dy;
@@ -683,6 +702,13 @@
                 chicken.y + chicken.height > obstacle.y
             ) {
                 isGameOver = true;
+                
+                // Trigger Blast Animation at collision point
+                blastAnimation.active = true;
+                blastAnimation.x = obstacle.x;
+                blastAnimation.y = obstacle.y;
+                blastAnimation.timer = 40; // Kitni dair blast show ho
+
                 handleGameOverEarnings();
             }
         }
@@ -709,13 +735,19 @@
             ctx.fillStyle = '#333';
             ctx.fillRect(0, 200, canvas.width, 50);
 
-            // Chicken
-            ctx.font = '28px Arial';
-            ctx.fillText('🐔', chicken.x - 4, chicken.y + 24);
+            // Agar blast active hai toh bomb/chicken ki jagah blast (💥) dikhao
+            if (blastAnimation.active) {
+                ctx.font = '36px Arial';
+                ctx.fillText('💥', blastAnimation.x - 5, blastAnimation.y + 25);
+            } else {
+                // Chicken
+                ctx.font = '28px Arial';
+                ctx.fillText('🐔', chicken.x - 4, chicken.y + 24);
 
-            // Obstacle (Bomb Emoji 💣)
-            ctx.font = '28px Arial';
-            ctx.fillText('💣', obstacle.x - 2, obstacle.y + 24);
+                // Obstacle (Bomb Emoji 💣)
+                ctx.font = '28px Arial';
+                ctx.fillText('💣', obstacle.x - 2, obstacle.y + 24);
+            }
 
             // Initial Start Screen Overlay
             if (!gameStarted && !isPaused && !checkGameLockCondition()) {
@@ -735,8 +767,8 @@
                 ctx.fillText('Game Paused', 130, 130);
             }
 
-            // Game Over Screen Overlay
-            if (isGameOver) {
+            // Game Over Screen Overlay (Jab blast khatam ho jaye tab show ho)
+            if (isGameOver && !blastAnimation.active) {
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 ctx.fillStyle = '#fff';
