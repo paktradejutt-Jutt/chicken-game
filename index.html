@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chicken Run & Earn Gaming Hub</title>
+    <title>Chicken Run Game</title>
     <style>
         * {
             box-sizing: border-box;
@@ -18,14 +18,14 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            padding: 15px;
+            padding: 20px;
         }
         .container {
             width: 100%;
             max-width: 450px;
             background: #1e1e1e;
             border-radius: 12px;
-            padding: 15px;
+            padding: 20px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
         header {
@@ -34,7 +34,7 @@
             align-items: center;
             border-bottom: 1px solid #333;
             padding-bottom: 10px;
-            margin-bottom: 12px;
+            margin-bottom: 15px;
         }
         .wallet-box {
             background: #2c2c2c;
@@ -74,8 +74,8 @@
         input, select {
             width: 100%;
             padding: 10px;
-            margin-top: 6px;
-            margin-bottom: 10px;
+            margin-top: 8px;
+            margin-bottom: 12px;
             background: #2c2c2c;
             border: 1px solid #444;
             color: white;
@@ -90,31 +90,30 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
         }
         .chicken {
             font-size: 40px;
             position: absolute;
             left: 30px;
-            transition: bottom 0.3s;
+            bottom: 20px;
+            transition: bottom 0.3s ease;
         }
         .nav-tabs {
             display: flex;
-            gap: 4px;
-            margin-bottom: 12px;
-            overflow-x: auto;
-            padding-bottom: 5px;
+            gap: 5px;
+            margin-bottom: 15px;
         }
         .nav-tabs button {
             flex: 1;
-            padding: 6px 8px;
+            padding: 10px;
             background: #2c2c2c;
             border: none;
             color: white;
-            border-radius: 5px;
+            border-radius: 6px;
             cursor: pointer;
-            font-size: 12px;
-            white-space: nowrap;
+            font-weight: bold;
+            font-size: 14px;
         }
         .nav-tabs button.active {
             background: #ff5722;
@@ -127,109 +126,74 @@
             font-size: 14px;
             border-left: 4px solid #ff5722;
         }
-        /* Spin Wheel Styling */
-        .wheel-container {
-            text-align: center;
-            margin-bottom: 10px;
-        }
-        .wheel {
-            width: 150px;
-            height: 150px;
-            border: 6px solid #ff5722;
-            border-radius: 50%;
-            margin: 0 auto 10px auto;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 20px;
-            background: #2c2c2c;
-            transition: transform 3s ease-out;
-        }
     </style>
 </head>
 <body>
 
     <div class="container">
         <header>
-            <h2>🎮 Gaming Hub</h2>
+            <h2>🐔 Chicken Run</h2>
             <div class="wallet-box">Rs: <span id="balance">100</span></div>
         </header>
 
         <div class="nav-tabs">
-            <button class="tab-btn active" onclick="switchTab('game1')">🐔 Chicken</button>
-            <button class="tab-btn" onclick="switchTab('game2')">🪙 Flip</button>
-            <button class="tab-btn" onclick="switchTab('game3')">🎡 Spin</button>
+            <button class="tab-btn active" onclick="switchTab('game')">Game</button>
             <button class="tab-btn" onclick="switchTab('deposit')">Deposit</button>
             <button class="tab-btn" onclick="switchTab('withdraw')">Withdraw</button>
         </div>
 
-        <!-- 1. CHICKEN RUN GAME -->
-        <div id="game1" class="section active">
+        <!-- GAME SECTION -->
+        <div id="game" class="section active">
             <div class="game-area">
-                <div class="chicken" id="chicken" style="bottom: 20px;">🐔</div>
+                <div class="chicken" id="chicken">🐔</div>
             </div>
-            <p style="text-align: center; margin-bottom: 10px; font-size: 13px; color: #aaa;">Jump to win coins! (Cost: 10 Rs)</p>
+            <p style="text-align: center; margin-bottom: 10px; font-size: 14px; color: #aaa;">Tap Jump to win coins! (Cost: 10 Rs)</p>
             <button class="btn" onclick="jumpChicken()">Jump Now!</button>
-        </div>
-
-        <!-- 2. COIN FLIP GAME -->
-        <div id="game2" class="section">
-            <div class="game-area" style="flex-direction: column;">
-                <div id="coinResult" style="font-size: 50px; margin-bottom: 10px;">🪙</div>
-                <p id="coinText" style="font-size: 14px; color: #00ffcc;">Select Head or Tail & Bet</p>
-            </div>
-            <label>Choose Side</label>
-            <select id="coinChoice">
-                <option value="Head">Head</option>
-                <option value="Tail">Tail</option>
-            </select>
-            <label>Bet Amount (Rs)</label>
-            <input type="number" id="coinBet" value="20">
-            <button class="btn" onclick="playCoinFlip()">Flip Coin</button>
-        </div>
-
-        <!-- 3. LUCKY SPIN WHEEL -->
-        <div id="game3" class="section">
-            <div class="wheel-container">
-                <div class="wheel" id="spinWheel">SPIN</div>
-            </div>
-            <p style="text-align: center; font-size: 13px; color: #aaa; margin-bottom: 10px;">Cost per spin: 20 Rs</p>
-            <button class="btn" onclick="spinWheelGame()">Spin the Wheel</button>
         </div>
 
         <!-- DEPOSIT SECTION -->
         <div id="deposit" class="section">
             <h3>Add Funds (Manual)</h3>
-            <div style="background: #2c2c2c; padding: 10px; border-radius: 6px; margin: 10px 0; font-size: 13px;">
+            <p style="font-size: 13px; color: #aaa; margin-top: 5px;">Send money to our JazzCash/EasyPaisa account and submit details.</p>
+            
+            <div style="background: #2c2c2c; padding: 10px; border-radius: 6px; margin: 10px 0; font-size: 14px;">
                 <p><b>JazzCash / EasyPaisa:</b> 0300-1234567</p>
                 <p><b>Account Title:</b> Admin Gaming</p>
             </div>
-            <label>Method</label>
+
+            <label>Select Method</label>
             <select id="depMethod">
                 <option value="JazzCash">JazzCash</option>
                 <option value="EasyPaisa">EasyPaisa</option>
             </select>
+
             <label>Amount (PKR)</label>
             <input type="number" id="depAmount" placeholder="Enter amount">
+
             <label>Transaction ID (TID)</label>
             <input type="text" id="depTid" placeholder="Enter 11-digit TID">
-            <button class="btn" onclick="submitDeposit()">Submit Deposit</button>
+
+            <button class="btn" onclick="submitDeposit()">Submit Deposit Request</button>
         </div>
 
         <!-- WITHDRAW SECTION -->
         <div id="withdraw" class="section">
             <h3>Withdraw Funds</h3>
-            <label>Method</label>
+            
+            <label>Select Method</label>
             <select id="wdMethod">
                 <option value="JazzCash">JazzCash</option>
                 <option value="EasyPaisa">EasyPaisa</option>
             </select>
+
             <label>Account Number</label>
             <input type="text" id="wdAccount" placeholder="03XXXXXXXXX">
+
             <label>Amount (PKR)</label>
             <input type="number" id="wdAmount" placeholder="Enter amount">
+
             <button class="btn" onclick="submitWithdraw()">Request Withdrawal</button>
+            
             <div id="withdrawStatus"></div>
         </div>
     </div>
@@ -250,10 +214,9 @@
             document.getElementById('balance').innerText = balance;
         }
 
-        // 1. Chicken Game Logic
         function jumpChicken() {
             if (balance < 10) {
-                alert("Low balance! Please deposit funds.");
+                alert("Low balance! Please deposit funds to play.");
                 return;
             }
             balance -= 10;
@@ -270,70 +233,6 @@
             }, 300);
         }
 
-        // 2. Coin Flip Logic
-        function playCoinFlip() {
-            let bet = parseInt(document.getElementById('coinBet').value);
-            let choice = document.getElementById('coinChoice').value;
-
-            if (isNaN(bet) || bet <= 0) {
-                alert("Please enter a valid bet amount!");
-                return;
-            }
-            if (balance < bet) {
-                alert("Insufficient balance!");
-                return;
-            }
-
-            balance -= bet;
-            updateBalance();
-
-            let outcome = Math.random() < 0.5 ? "Head" : "Tail";
-            let coinResult = document.getElementById('coinResult');
-            let coinText = document.getElementById('coinText');
-
-            coinResult.innerText = outcome === "Head" ? "🪙 H" : "🪙 T";
-
-            if (outcome === choice) {
-                let winAmount = bet * 2;
-                balance += winAmount;
-                updateBalance();
-                coinText.innerHTML = `<span style="color: #00ffcc;">You Won Rs. ${winAmount}! (${outcome})</span>`;
-            } else {
-                coinText.innerHTML = `<span style="color: #ff3333;">You Lost! It was ${outcome}</span>`;
-            }
-        }
-
-        // 3. Spin Wheel Logic
-        let currentDegree = 0;
-        function spinWheelGame() {
-            if (balance < 20) {
-                alert("Low balance! You need at least Rs. 20 to spin.");
-                return;
-            }
-            balance -= 20;
-            updateBalance();
-
-            let wheel = document.getElementById('spinWheel');
-            let prizes = [0, 10, 20, 40, 50, 100];
-            let randomPrize = prizes[Math.floor(Math.random() * prizes.length)];
-            
-            currentDegree += 720 + Math.floor(Math.random() * 360);
-            wheel.style.transform = `rotate(${currentDegree}deg)`;
-            wheel.innerText = "...";
-
-            setTimeout(() => {
-                wheel.innerText = "Rs " + randomPrize;
-                balance += randomPrize;
-                updateBalance();
-                if(randomPrize > 0) {
-                    alert("Congratulations! You won Rs. " + randomPrize);
-                } else {
-                    alert("Oops! Better luck next time.");
-                }
-            }, 3000);
-        }
-
-        // Deposit Logic
         function submitDeposit() {
             const amount = document.getElementById('depAmount').value;
             const tid = document.getElementById('depTid').value;
@@ -341,12 +240,11 @@
                 alert("Please fill all fields!");
                 return;
             }
-            alert("Deposit request submitted successfully!");
+            alert("Deposit request submitted successfully! Admin will verify your TID.");
             document.getElementById('depAmount').value = '';
             document.getElementById('depTid').value = '';
         }
 
-        // Withdraw Logic
         function submitWithdraw() {
             const amount = document.getElementById('wdAmount').value;
             const account = document.getElementById('wdAccount').value;
@@ -370,7 +268,7 @@
                     <div class="status-box">
                         <b>Withdrawal Request Submitted!</b><br>
                         Status: <span style="color: #ff9800;">Pending (24 Hours Timer)</span><br>
-                        First withdrawal of Rs. ${amount} will be processed within 24 hours.
+                        Your first withdrawal of Rs. ${amount} is under review and will be transferred within 24 hours.
                     </div>
                 `;
             } else {
