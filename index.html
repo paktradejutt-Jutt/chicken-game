@@ -224,11 +224,11 @@
 </head>
 <body>
 
-    <!-- Referral Lock Popup Modal (Shown only if Balance >= 400 and referrals < 5) -->
+    <!-- Referral Lock Popup Modal (Shown only if Balance >= 1000 and referrals < 5) -->
     <div class="modal-overlay" id="referralModal">
         <div class="modal-box">
-            <h2>🔒 Referral Limit Reached!</h2>
-            <p>Aapki winning <b>Rs. 400 ya usse zyada</b> ho chuki hai! Mazeed game khelne ke liye kam az kam <b>5 logon ko apne referral link se invite</b> karwana lazmi hai.</p>
+            <h2>🔒 Withdrawal & Play Limit Reached!</h2>
+            <p>Aapka balance <b>Rs. 1000 ya usse zyada</b> ho chuka hai! Mazeed game khelne aur withdraw karne ke liye kam az kam <b>5 logon ko apne referral link se invite</b> karwana lazmi hai.</p>
             
             <div class="progress-bar-bg">
                 <div class="progress-bar-fill" id="progressFill"></div>
@@ -308,8 +308,8 @@
         document.getElementById('userBalance').innerText = 'Rs. ' + balance;
 
         function checkGameLockCondition() {
-            // Agar balance Rs. 400 ya usse zyada hai AUR referrals 5 se kam hain, toh game lock ho gi
-            if (balance >= 400 && referralCount < 5) {
+            // Agar balance Rs. 1000 ya usse zyada hai AUR referrals 5 se kam hain, toh game lock ho gi
+            if (balance >= 1000 && referralCount < 5) {
                 let percentage = (referralCount / 5) * 100;
                 document.getElementById('progressFill').style.width = percentage + '%';
                 document.getElementById('progressText').innerText = referralCount + ' / 5 Referrals Completed';
@@ -337,10 +337,10 @@
                 document.getElementById('progressText').innerText = referralCount + ' / 5 Referrals Completed';
 
                 if(referralCount >= 5) {
-                    alert("🎉 Mubarak ho! Aapke 5 referrals mukammal ho gaye hain. Ab aap game play kar sakte hain!");
+                    alert("🎉 Mubarak ho! Aapke 5 referrals mukammal ho gaye hain. Ab aap mazeed game play aur withdraw kar sakte hain!");
                     document.getElementById('referralModal').style.display = 'none';
                 } else {
-                    alert(`Mazeed ${5 - referralCount} logoon ko invite karein taake game unlock ho jaye.`);
+                    alert(`Mazeed ${5 - referralCount} logoon ko invite karein taake limit unlock ho jaye.`);
                 }
             }
         }
@@ -359,6 +359,11 @@
 
             if (balance < 1000) {
                 alert(`❌ Withdrawal Failed! Minimum withdrawal limit Rs. 1000 hai. Aapka current balance Rs. ${balance} hai.`);
+                return;
+            }
+
+            if (checkGameLockCondition()) {
+                alert("Withdrawal lock hai! Pehle 5 referrals mukammal karein.");
                 return;
             }
 
@@ -454,7 +459,7 @@
 
         function startGame() {
             if (checkGameLockCondition()) {
-                alert("Aapka balance Rs. 400 ya usse zyada hai. Pehle 5 referrals mukammal karein!");
+                alert("Aapka balance Rs. 1000 ya usse zyada hai. Pehle 5 referrals mukammal karein!");
                 return;
             }
 
@@ -526,7 +531,7 @@
             localStorage.setItem('chicken_balance', balance);
             document.getElementById('userBalance').innerText = 'Rs. ' + balance;
 
-            // Check if earnings reached 400 after game over
+            // Check if earnings reached 1000 after game over
             checkGameLockCondition();
         }
 
