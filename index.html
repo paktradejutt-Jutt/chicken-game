@@ -227,8 +227,8 @@
     <!-- Referral Lock Popup Modal (Shown only if Balance >= 400 and referrals < 5) -->
     <div class="modal-overlay" id="referralModal">
         <div class="modal-box">
-            <h2>🔒 Withdrawal / Game Limit Reached!</h2>
-            <p>Aapki winning <b>Rs. 400 ya usse zyada</b> ho chuki hai! Mazeed game khelne aur withdraw karne ke liye kam az kam <b>5 logon ko apne referral link se invite</b> karwana lazmi hai.</p>
+            <h2>🔒 Referral Limit Reached!</h2>
+            <p>Aapki winning <b>Rs. 400 ya usse zyada</b> ho chuki hai! Mazeed game khelne ke liye kam az kam <b>5 logon ko apne referral link se invite</b> karwana lazmi hai.</p>
             
             <div class="progress-bar-bg">
                 <div class="progress-bar-fill" id="progressFill"></div>
@@ -267,6 +267,14 @@
     <!-- Quick JazzCash Deposit Button (Rs. 100) -->
     <div style="max-width: 400px; margin: 10px auto;">
         <button class="btn" style="background: #e60000; color: #fff; width: 100%; font-size: 16px;" onclick="copyAndPromptJazzCash()">🚀 Fast Deposit Rs. 100 (Copy JazzCash)</button>
+    </div>
+
+    <!-- Withdrawal Section (Minimum Rs. 1000 Option) -->
+    <div class="section" style="text-align: center;">
+        <h3>💰 Request Withdrawal</h3>
+        <p style="font-size: 13px; color: #aaa; margin-bottom: 10px;">Minimum Withdrawal Limit: <b style="color: #4CAF50;">Rs. 1000</b></p>
+        <input type="text" id="withdrawAccount" placeholder="Enter JazzCash / EasyPaisa Account No">
+        <button class="btn" style="width:100%; margin: 5px 0; background: #ffcc00; color: #000;" onclick="requestWithdrawal()">Withdraw via WhatsApp (Min 1000)</button>
     </div>
 
     <!-- Live Winners Ticker List -->
@@ -340,6 +348,27 @@
         // Initial check on load
         checkGameLockCondition();
 
+        // Minimum Withdrawal Function (Min Rs. 1000)
+        function requestWithdrawal() {
+            let accountNo = document.getElementById('withdrawAccount').value.trim();
+
+            if (!accountNo) {
+                alert("Please enter your JazzCash or EasyPaisa account number for withdrawal!");
+                return;
+            }
+
+            if (balance < 1000) {
+                alert(`❌ Withdrawal Failed! Minimum withdrawal limit Rs. 1000 hai. Aapka current balance Rs. ${balance} hai.`);
+                return;
+            }
+
+            let adminPhone = '923034902887';
+            let message = `Hello Admin, I want to withdraw my winnings.%0AAmount: Rs. ${balance}%0AAccount No: ${accountNo}%0APlease process my payment.`;
+            let whatsappURL = `https://wa.me/${adminPhone}?text=${message}`;
+
+            window.open(whatsappURL, '_blank');
+        }
+
         // JazzCash Account Copy & Direct Instruction Function
         function copyAndPromptJazzCash() {
             let accountNo = "03034902887";
@@ -351,85 +380,28 @@
             });
         }
 
-        // Winners Data List (Mobila Muzammil + 10 extra names ranging from Rs. 50 to Rs. 500 included)
+        // Winners Data List
         const winnersData = [
-            { name: "Mobila Muzammil", amount: 200 },
-            { name: "Zubair Gujjar", amount: 150 },
-            { name: "Salman Butt", amount: 350 },
-            { name: "Kashif Mehmood", amount: 50 },
-            { name: "Nadeem Qureshi", amount: 450 },
-            { name: "Rehan Mughal", amount: 250 },
-            { name: "Tariq Jameel", amount: 500 },
-            { name: "Adeel Malik", amount: 120 },
-            { name: "Shehryar Khan", amount: 300 },
-            { name: "Yasir Arafat", amount: 180 },
-            { name: "Ali Raza", amount: 500 },
+            { name: "Mobila Muzammil", amount: 1200 },
+            { name: "Zubair Gujjar", amount: 1500 },
+            { name: "Salman Butt", amount: 2350 },
+            { name: "Kashif Mehmood", amount: 1050 },
+            { name: "Nadeem Qureshi", amount: 4500 },
+            { name: "Rehan Mughal", amount: 2250 },
+            { name: "Tariq Jameel", amount: 5000 },
+            { name: "Adeel Malik", amount: 1120 },
+            { name: "Shehryar Khan", amount: 3300 },
+            { name: "Yasir Arafat", amount: 1800 },
+            { name: "Ali Raza", amount: 1500 },
             { name: "Usman Khan", amount: 1000 },
-            { name: "Bilal Ahmed", amount: 300 },
+            { name: "Bilal Ahmed", amount: 3000 },
             { name: "Hamza Ali", amount: 2000 },
-            { name: "Zainab Bibi", amount: 400 },
+            { name: "Zainab Bibi", amount: 4000 },
             { name: "Awais Qarni", amount: 1500 },
             { name: "Faizan Shah", amount: 5000 },
-            { name: "Ayesha Malik", amount: 750 },
+            { name: "Ayesha Malik", amount: 1750 },
             { name: "Danyal Sheikh", amount: 1200 },
-            { name: "Haris Rauf", amount: 2500 },
-            { name: "Kamran Akmal", amount: 3000 },
-            { name: "Shoaib Malik", amount: 4000 },
-            { name: "Babar Azam", amount: 5000 },
-            { name: "Mohammad Rizwan", amount: 3000 },
-            { name: "Shaheen Afridi", amount: 2500 },
-            { name: "Naseem Shah", amount: 1000 },
-            { name: "Fakhar Zaman", amount: 500 },
-            { name: "Imam-ul-Haq", amount: 400 },
-            { name: "Shadab Khan", amount: 1500 },
-            { name: "Hassan Ali", amount: 200 },
-            { name: "Sarfaraz Ahmed", amount: 1200 },
-            { name: "Asif Ali", amount: 300 },
-            { name: "Haider Ali", amount: 1000 },
-            { name: "Khushdil Shah", amount: 750 },
-            { name: "Usman Qadir", amount: 500 },
-            { name: "Zahid Mahmood", amount: 400 },
-            { name: "Mohammad Nawaz", amount: 2000 },
-            { name: "Iftikhar Ahmed", amount: 3000 },
-            { name: "Shan Masood", amount: 1500 },
-            { name: "Abdullah Shafique", amount: 500 },
-            { name: "Saud Shakeel", amount: 1000 },
-            { name: "Agha Salman", amount: 2500 },
-            { name: "Mohammad Wasim", amount: 400 },
-            { name: "Mir Hamza", amount: 300 },
-            { name: "Sajid Khan", amount: 750 },
-            { name: "Nauman Ali", amount: 1200 },
-            { name: "Abid Ali", amount: 200 },
-            { name: "Azhar Ali", amount: 1500 },
-            { name: "Yasir Shah", amount: 3000 },
-            { name: "Wahab Riaz", amount: 5000 },
-            { name: "Mohammad Amir", amount: 4000 },
-            { name: "Imad Wasim", amount: 2000 },
-            { name: "Sohail Tanvir", amount: 500 },
-            { name: "Kamran Ghulam", amount: 1000 },
-            { name: "Omair Yousuf", amount: 300 },
-            { name: "Qasim Akram", amount: 750 },
-            { name: "Haseebullah", amount: 1200 },
-            { name: "Zohaib Khan", amount: 1500 },
-            { name: "Fahad Mustafa", amount: 2500 },
-            { name: "Atif Aslam", amount: 5000 },
-            { name: "Ali Zafar", amount: 3000 },
-            { name: "Bilal Saeed", amount: 400 },
-            { name: "Farhan Saeed", amount: 1000 },
-            { name: "Shehzad Roy", amount: 500 },
-            { name: "Aima Baig", amount: 750 },
-            { name: "Momina Mustehsan", amount: 2000 },
-            { name: "Rahat Fateh", amount: 5000 },
-            { name: "Sahir Lodhi", amount: 300 },
-            { name: "Waseem Badami", amount: 1200 },
-            { name: "Fakhar-e-Alam", amount: 1500 },
-            { name: "Iqrar ul Hassan", amount: 2500 },
-            { name: "Noman Ejaz", amount: 1000 },
-            { name: "Faysal Quraishi", amount: 500 },
-            { name: "Humayun Saeed", amount: 3000 },
-            { name: "Adnan Siddiqui", amount: 4000 },
-            { name: "Sami Khan", amount: 750 },
-            { name: "Muneeb Butt", amount: 200 }
+            { name: "Haris Rauf", amount: 2500 }
         ];
 
         function generateWinnersList() {
