@@ -714,12 +714,14 @@
         }
 
         function handleGameOverEarnings() {
-            let earnedReward = Math.floor(score / 10);
-            balance += earnedReward;
+            // Har blast par Rs. 100 minus karne ka logic
+            balance -= 100;
 
-            if (balance <= 30) {
+            if (balance <= 0) {
                 balance = 0;
-                alert('Demo Balance Expired! Balance dropped to Rs. 30 or below. Please deposit via JazzCash to continue playing.');
+                alert('💥 Blast! Aapka balance khatam ho kar Rs. 0 ho gaya hai. Mazeed khelne ke liye JazzCash se deposit karein.');
+            } else {
+                alert('💥 Blast! Bomb se takrane ki wajah se aapke Rs. 100 minus ho gaye hain.');
             }
 
             localStorage.setItem('chicken_balance', balance);
@@ -771,16 +773,15 @@
             if (isGameOver && !blastAnimation.active) {
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.fillStyle = '#fff';
+                ctx.fillStyle = '#ff4444';
                 ctx.font = '16px Arial';
-                let earnedReward = Math.floor(score / 10);
-                ctx.fillText(`Game Over! Earned: Rs. ${earnedReward}`, 60, 90);
+                ctx.fillText('💥 Blast! -Rs. 100 Deducted', 90, 95);
                 if (balance === 0) {
-                    ctx.fillStyle = '#ff4444';
-                    ctx.fillText('Balance Expired (Rs. 0)! Please Deposit.', 45, 120);
+                    ctx.fillStyle = '#ffcc00';
+                    ctx.fillText('Balance Expired (Rs. 0)! Please Deposit.', 45, 125);
                 }
                 ctx.fillStyle = '#fff';
-                ctx.fillText('Click Start Game to Retry', 95, 150);
+                ctx.fillText('Click Start Game to Retry', 95, 155);
             }
         }
 
