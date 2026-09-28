@@ -252,7 +252,6 @@
     <div class="wallet-box">
         <div>Balance: <span id="userBalance">Rs. 0</span></div>
         <div>Time: <span id="timerDisplay">05:00</span></div>
-        <div>Rest: <span id="restTimerDisplay" style="color: #ff4444;">00:00</span></div>
     </div>
 
     <!-- Game Area -->
@@ -319,9 +318,6 @@
         let totalPlayedSeconds = localStorage.getItem('chicken_play_time') ? parseInt(localStorage.getItem('chicken_play_time')) : 0;
         const maxPlaySeconds = 300; 
 
-        // 1 Hour Rest Timer Setup (3600 seconds)
-        let restEndTimestamp = localStorage.getItem('chicken_rest_end') ? parseInt(localStorage.getItem('chicken_rest_end')) : 0;
-
         // Withdrawal Timer Setup
         let withdrawEndTimestamp = localStorage.getItem('chicken_withdraw_end') ? parseInt(localStorage.getItem('chicken_withdraw_end')) : 0;
         let firstWithdrawalDone = localStorage.getItem('chicken_first_withdrawal_done') === 'true';
@@ -335,22 +331,6 @@
             document.getElementById('timerDisplay').innerText = (mins < 10 ? '0' : '') + mins + ':' + (secs < 10 ? '0' : '') + secs;
         }
         updateTimerDisplay();
-
-        function updateRestTimerDisplay() {
-            let now = Date.now();
-            if (restEndTimestamp > now) {
-                let diffSecs = Math.floor((restEndTimestamp - now) / 1000);
-                let hrs = Math.floor(diffSecs / 3600);
-                let mins = Math.floor((diffSecs % 3600) / 60);
-                let secs = diffSecs % 60;
-                document.getElementById('restTimerDisplay').innerText = 
-                    (hrs < 10 ? '0' : '') + hrs + ':' + (mins < 10 ? '0' : '') + mins + ':' + (secs < 10 ? '0' : '') + secs;
-                return true; 
-            } else {
-                document.getElementById('restTimerDisplay').innerText = "00:00:00";
-                return false; 
-            }
-        }
 
         function updateWithdrawTimerDisplay() {
             let now = Date.now();
@@ -385,38 +365,7 @@
         }
 
         function checkGameLockCondition() {
-            let now = Date.now();
-
-            // 1) Check 1-Hour Rest if Balance > 1000
-            if (balance > 1000) {
-                if (restEndTimestamp <= now) {
-                    restEndTimestamp = now + (3600 * 1000);
-                    localStorage.setItem('chicken_rest_end', restEndTimestamp);
-                }
-            }
-
-            // Agar rest active hai
-            if (restEndTimestamp > now) {
-                let diffSecs = Math.floor((restEndTimestamp - now) / 1000);
-                let hrs = Math.floor(diffSecs / 3600);
-                let mins = Math.floor((diffSecs % 3600) / 60);
-                let secs = diffSecs % 60;
-                let timeStr = (hrs < 10 ? '0' : '') + hrs + ':' + (mins < 10 ? '0' : '') + mins + ':' + (secs < 10 ? '0' : '') + secs;
-
-                document.getElementById('modalTitle').innerText = "⏳ 1 Hour Rest Period Active!";
-                document.getElementById('modalReason').innerHTML = `Aapka balance <b>Rs. 1000 se zyada</b> ho chuka hai! Is liye aapko 1 ghante ke rest par laga diya gaya hai. Mazeed game tab hi start hogi jab rest timer khatam ho jaye.<br><br><b>Remaining Rest Time: <span style="color:#ff4444; font-size:18px;">${timeStr}</span></b>`;
-                
-                document.getElementById('referralProgressContainer').style.display = 'none';
-                document.getElementById('actionButtonsDiv').style.display = 'none';
-                document.getElementById('modalHint').style.display = 'none';
-
-                document.getElementById('referralModal').style.display = 'flex';
-                gameStarted = false;
-                isPaused = true;
-                return true;
-            }
-
-            // 2) Check Referral/Time Limit Condition (Balance >= 500 OR Time >= 5 mins)
+            // Check Referral/Time Limit Condition (Balance >= 500 OR Time >= 5 mins)
             if ((balance >= 500 || totalPlayedSeconds >= maxPlaySeconds) && approvedDeposits < 5) {
                 let percentage = (approvedDeposits / 5) * 100;
                 document.getElementById('progressFill').style.width = percentage + '%';
@@ -468,9 +417,8 @@
             }
         }
 
-        // Continuous Background Loop (Har 1 second mein timers update honge)
+        // Continuous Background Loop
         setInterval(function() {
-            updateRestTimerDisplay();
             updateWithdrawTimerDisplay();
             checkGameLockCondition();
         }, 1000);
@@ -479,7 +427,7 @@
         checkGameLockCondition();
         updateWithdrawTimerDisplay();
 
-        // Withdrawal Function (1st withdrawal 24h, next withdrawals 1 min)
+        // Withdrawal Function
         function requestWithdrawal() {
             let accountNo = document.getElementById('withdrawAccount').value.trim();
 
@@ -507,13 +455,11 @@
             let waitMessageText;
 
             if (!firstWithdrawalDone) {
-                // 1st Withdrawal: 24 Hours
                 waitTimeMs = 24 * 3600 * 1000;
                 firstWithdrawalDone = true;
                 localStorage.setItem('chicken_first_withdrawal_done', 'true');
                 waitMessageText = "Please process my payment within 24 hours.";
             } else {
-                // Next Withdrawals: 1 Minute
                 waitTimeMs = 60 * 1000;
                 waitMessageText = "Please process my payment within 1 minute.";
             }
@@ -621,7 +567,7 @@
 
         function startGame() {
             if (checkGameLockCondition()) {
-                alert("Aapka balance 1000 se zyada hone ki wajah se rest mode par hai ya referrals baqi hain!");
+                alert("Referrals baqi hain! Pehle conditions poori karein.");
                 return;
             }
 
@@ -667,7 +613,6 @@
         function update() {
             if (!gameStarted || isPaused) return;
 
-            // Agar blast chal raha hai toh timer kam karo
             if (blastAnimation.active) {
                 blastAnimation.timer--;
                 if (blastAnimation.timer <= 0) {
@@ -703,7 +648,6 @@
             ) {
                 isGameOver = true;
                 
-                // Trigger Blast Animation at collision point
                 blastAnimation.active = true;
                 blastAnimation.x = obstacle.x;
                 blastAnimation.y = obstacle.y;
@@ -714,7 +658,6 @@
         }
 
         function handleGameOverEarnings() {
-            // Har blast par Rs. 100 minus karne ka logic
             balance -= 100;
 
             if (balance <= 0) {
@@ -737,21 +680,17 @@
             ctx.fillStyle = '#333';
             ctx.fillRect(0, 200, canvas.width, 50);
 
-            // Agar blast active hai toh bomb/chicken ki jagah blast (💥) dikhao
             if (blastAnimation.active) {
                 ctx.font = '36px Arial';
                 ctx.fillText('💥', blastAnimation.x - 5, blastAnimation.y + 25);
             } else {
-                // Chicken
                 ctx.font = '28px Arial';
                 ctx.fillText('🐔', chicken.x - 4, chicken.y + 24);
 
-                // Obstacle (Bomb Emoji 💣)
                 ctx.font = '28px Arial';
                 ctx.fillText('💣', obstacle.x - 2, obstacle.y + 24);
             }
 
-            // Initial Start Screen Overlay
             if (!gameStarted && !isPaused && !checkGameLockCondition()) {
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -760,7 +699,6 @@
                 ctx.fillText('Click "Start Game" to Play', 95, 120);
             }
 
-            // Pause Screen Overlay
             if (isPaused && !checkGameLockCondition()) {
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -769,7 +707,6 @@
                 ctx.fillText('Game Paused', 130, 130);
             }
 
-            // Game Over Screen Overlay
             if (isGameOver && !blastAnimation.active) {
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
