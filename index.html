@@ -142,7 +142,7 @@
         .marquee-content {
             position: absolute;
             width: 100%;
-            animation: scrollUp 25s linear infinite;
+            animation: scrollUp 35s linear infinite;
         }
         .winner-item {
             font-size: 13px;
@@ -156,7 +156,7 @@
         }
         @keyframes scrollUp {
             0% { top: 100%; }
-            100% { top: -450%; }
+            100% { top: -650%; }
         }
     </style>
 </head>
@@ -185,12 +185,12 @@
 
     <button class="btn" id="jumpBtn" onclick="makeJump()">JUMP (TAP HERE)</button>
 
-    <!-- Live Winners Ticker (50 Names List) -->
+    <!-- Live Winners Ticker (70 Names List) -->
     <div class="winners-ticker">
         <h4>🔴 Live Winners Feed</h4>
         <div class="marquee-container">
             <div class="marquee-content" id="winnersList">
-                <!-- JavaScript se 50 names yahan insert honge -->
+                <!-- JavaScript se 70 names yahan insert honge -->
             </div>
         </div>
     </div>
@@ -209,7 +209,7 @@
     </div>
 
     <script>
-        // 50 Names & Winnings Data Generator
+        // 70 Names & Winnings Data Generator
         const pakistaniNames = [
             "Ali Raza", "Usman Khan", "Bilal Ahmed", "Hamza Ali", "Zainab Bibi", 
             "Awais Qarni", "Faizan Shah", "Ayesha Malik", "Danyal Sheikh", "Haris Rauf",
@@ -220,7 +220,11 @@
             "Abdullah Shafique", "Saud Shakeel", "Agha Salman", "Mohammad Wasim", "Mir Hamza",
             "Sajid Khan", "Nauman Ali", "Zahid Mehmood", "Abid Ali", "Azhar Ali",
             "Yasir Shah", "Wahab Riaz", "Mohammad Amir", "Imad Wasim", "Haris Sohail",
-            "Sohail Tanvir", "Kamran Ghulam", "Omair Yousuf", "Qasim Akram", "Haseebullah"
+            "Sohail Tanvir", "Kamran Ghulam", "Omair Yousuf", "Qasim Akram", "Haseebullah",
+            "Zohaib Khan", "Fahad Mustafa", "Atif Aslam", "Ali Zafar", "Bilal Saeed",
+            "Farhan Saeed", "Shehzad Roy", "Aima Baig", "Momina Mustehsan", "Rahat Fateh",
+            "Sahir Lodhi", "Waseem Badami", "Fakhar-e-Alam", "Iqrar ul Hassan", "Noman Ejaz",
+            "Faysal Quraishi", "Humayun Saeed", "Adnan Siddiqui", "Sami Khan", "Muneeb Butt"
         ];
 
         const winningAmounts = [200, 300, 400, 500, 750, 1000, 1200, 1500, 2000, 2500, 3000, 4000, 5000];
