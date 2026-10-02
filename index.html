@@ -266,9 +266,9 @@
 
     <button class="btn" id="jumpBtn" onclick="makeJump()">JUMP (TAP HERE)</button>
 
-    <!-- Quick JazzCash Deposit Button (Rs. 100) -->
+    <!-- Quick EasyPaisa Deposit Button (Rs. 100) -->
     <div style="max-width: 400px; margin: 10px auto;">
-        <button class="btn" style="background: #e60000; color: #fff; width: 100%; font-size: 16px;" onclick="copyAndPromptJazzCash()">🚀 Fast Deposit Rs. 100 (Copy JazzCash)</button>
+        <button class="btn" style="background: #388E3C; color: #fff; width: 100%; font-size: 16px;" onclick="copyAndPromptEasyPaisa()">🚀 Fast Deposit Rs. 100 (Copy EasyPaisa)</button>
     </div>
 
     <!-- Withdrawal Section (Minimum Rs. 500 Option + 24Hr / 1Min Wait) -->
@@ -299,9 +299,9 @@
 
     <!-- Deposit & TID Section -->
     <div class="section">
-        <h3>JazzCash Deposit Verification</h3>
-        <p style="font-size: 13px; margin-bottom: 3px;">Send payment to JazzCash Account:</p>
-        <p style="font-size: 16px; color: #ffcc00; text-align: center; font-weight: bold; margin-bottom: 8px;">03034902887</p>
+        <h3>EasyPaisa Deposit Verification</h3>
+        <p style="font-size: 13px; margin-bottom: 3px;">Send payment to EasyPaisa Account:</p>
+        <p style="font-size: 16px; color: #ffcc00; text-align: center; font-weight: bold; margin-bottom: 8px;">03365336003</p>
         <p style="font-size: 12px; color: #aaa; margin-bottom: 8px;">Payment ke baad apni TID yahan enter karein:</p>
         
         <input type="number" id="depositAmount" placeholder="Enter Amount (e.g. 500)" value="100">
@@ -453,21 +453,21 @@
             localStorage.setItem('chicken_withdraw_end', withdrawEndTimestamp);
             updateWithdrawTimerDisplay();
 
-            let adminPhone = '923034902887';
+            let adminPhone = '923365336003';
             let message = `Hello Admin, I want to withdraw my winnings.%0AAmount: Rs. ${balance}%0AAccount No: ${accountNo}%0A${waitMessageText}`;
             let whatsappURL = `https://wa.me/${adminPhone}?text=${message}`;
 
             window.open(whatsappURL, '_blank');
         }
 
-        // JazzCash Account Copy & Direct Instruction Function
-        function copyAndPromptJazzCash() {
-            let accountNo = "03034902887";
+        // EasyPaisa Account Copy & Direct Instruction Function
+        function copyAndPromptEasyPaisa() {
+            let accountNo = "03365336003";
             
             navigator.clipboard.writeText(accountNo).then(function() {
-                alert("JazzCash Account Number (03034902887) copied successfully!\n\n1. Apni JazzCash App kholein.\n2. Rs. 100 is number par send karein.\n3. Jo TID (Transaction ID) milegi usay neche enter karke WhatsApp par verify karwayein.");
+                alert("EasyPaisa Account Number (03365336003) copied successfully!\n\n1. Apni EasyPaisa App kholein.\n2. Rs. 100 is number par send karein.\n3. Jo TID (Transaction ID) milegi usay neche enter karke WhatsApp par verify karwayein.");
             }, function() {
-                alert("JazzCash Account: 03034902887\nAap apni JazzCash app open karke is number par Rs. 100 send karein aur TID niche enter karein.");
+                alert("EasyPaisa Account: 03365336003\nAap apni EasyPaisa app open karke is number par Rs. 100 send karein aur TID niche enter karein.");
             });
         }
 
@@ -632,7 +632,7 @@
 
             if (balance <= 0) {
                 balance = 0;
-                alert('💥 Blast! Aapka balance khatam ho kar Rs. 0 ho gaya hai. Mazeed khelne ke liye JazzCash se deposit karein.');
+                alert('💥 Blast! Aapka balance khatam ho kar Rs. 0 ho gaya hai. Mazeed khelne ke liye EasyPaisa se deposit karein.');
             } else {
                 alert('💥 Blast! Bomb se takrane ki wajah se aapke Rs. 100 minus ho gaye hain.');
             }
@@ -710,8 +710,8 @@
                 return;
             }
 
-            let adminPhone = '923034902887'; 
-            let message = `Hello Admin, I have sent Rs. ${amount} via JazzCash to your account (03034902887).%0ATID: ${tid}%0APlease verify and approve my request.`;
+            let adminPhone = '923365336003'; 
+            let message = `Hello Admin, I have sent Rs. ${amount} via EasyPaisa to your account (03365336003).%0ATID: ${tid}%0APlease verify and approve my request.`;
             let whatsappURL = `https://wa.me/${adminPhone}?text=${message}`;
 
             window.open(whatsappURL, '_blank');
