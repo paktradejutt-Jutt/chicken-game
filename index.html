@@ -3,719 +3,179 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chicken Run PK - Play & Earn</title>
+    <title>Avatar Runner Game</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         body {
-            background: #1a1a1a;
+            background: #1a1a2e;
             color: #fff;
-            text-align: center;
-            padding: 10px;
-        }
-        header {
-            background: #222;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
         }
         h1 {
-            color: #ffcc00;
-            font-size: 24px;
-            margin-bottom: 5px;
-        }
-        .wallet-box {
-            background: #333;
-            padding: 10px;
-            border-radius: 8px;
-            margin: 10px auto;
-            max-width: 400px;
-            display: flex;
-            justify-content: space-around;
-            font-size: 13px;
-        }
-        .wallet-box span {
-            color: #4CAF50;
-            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 1.8rem;
+            color: #00ffcc;
+            text-shadow: 0 0 10px rgba(0,255,204,0.5);
         }
         .game-container {
+            width: 600px;
+            height: 200px;
+            background: #162447;
+            border-bottom: 4px solid #e43f5a;
             position: relative;
-            width: 100%;
-            max-width: 400px;
-            height: 250px;
-            background: #2b2b2b;
-            margin: 0 auto;
-            border: 3px solid #ffcc00;
-            border-radius: 10px;
             overflow: hidden;
-        }
-        canvas {
-            display: block;
-            background: linear-gradient(to bottom, #4a90e2, #50e3c2);
-            width: 100%;
-            height: 100%;
-        }
-        .btn {
-            background: #ffcc00;
-            color: #000;
-            border: none;
-            padding: 12px 20px;
-            font-size: 18px;
-            font-weight: bold;
             border-radius: 8px;
-            cursor: pointer;
-            margin: 10px 5px;
-            width: 90%;
-            max-width: 400px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
         }
-        .btn:active {
-            background: #e6b800;
-        }
-        .control-panel {
+        #avatar {
+            width: 40px;
+            height: 50px;
+            background: #00ffcc;
+            position: absolute;
+            bottom: 0;
+            left: 50px;
+            border-radius: 6px 6px 0 0;
             display: flex;
+            align-items: center;
             justify-content: center;
-            gap: 10px;
-            margin: 10px auto;
-            max-width: 400px;
+            font-size: 24px;
+            box-shadow: 0 0 10px #00ffcc;
         }
-        .ctrl-btn {
-            flex: 1;
-            padding: 10px;
-            font-size: 14px;
-            font-weight: bold;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
+        #obstacle {
+            width: 25px;
+            height: 40px;
+            background: #e43f5a;
+            position: absolute;
+            bottom: 0;
+            left: 600px;
+            border-radius: 4px 4px 0 0;
+            box-shadow: 0 0 10px #e43f5a;
         }
-        #startBtn { background: #4CAF50; color: #fff; }
-        #pauseBtn { background: #ff9800; color: #fff; }
-        .section {
-            background: #252525;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 15px auto;
-            max-width: 400px;
-            text-align: left;
+        .jump {
+            animation: jumpAnim 0.6s linear;
+        }
+        @keyframes jumpAnim {
+            0% { bottom: 0; }
+            50% { bottom: 110px; }
+            100% { bottom: 0; }
+        }
+        .score-board {
+            margin-top: 15px;
+            font-size: 1.2rem;
+            background: #1f4068;
+            padding: 8px 20px;
+            border-radius: 20px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
-        .section h3 {
-            color: #ffcc00;
-            margin-bottom: 10px;
-            text-align: center;
-        }
-        input {
-            width: 100%;
-            padding: 10px;
-            margin: 8px 0;
-            border-radius: 5px;
-            border: 1px solid #444;
-            background: #1a1a1a;
-            color: #fff;
-        }
-        
-        /* Modal Popup Styles */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            display: none; /* Default hidden */
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            padding: 20px;
-        }
-        .modal-box {
-            background: #222;
-            border: 2px solid #ffcc00;
-            padding: 20px;
-            border-radius: 12px;
-            max-width: 380px;
-            width: 100%;
-            text-align: center;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.7);
-        }
-        .modal-box h2 {
-            color: #ffcc00;
-            margin-bottom: 10px;
-            font-size: 20px;
-        }
-        .modal-box p {
-            font-size: 14px;
-            color: #ddd;
-            margin-bottom: 15px;
-            line-height: 1.5;
-        }
-        .progress-bar-bg {
-            background: #444;
-            border-radius: 10px;
-            height: 20px;
-            width: 100%;
-            margin: 15px 0;
-            overflow: hidden;
-            position: relative;
-        }
-        .progress-bar-fill {
-            background: #4CAF50;
-            height: 100%;
-            width: 0%;
-            transition: width 0.4s ease;
-        }
-        .progress-text {
-            position: absolute;
-            width: 100%;
-            top: 0;
-            left: 0;
-            font-size: 12px;
-            font-weight: bold;
-            color: #fff;
-            line-height: 20px;
-        }
-
-        /* Winners Ticker Styling */
-        .winners-ticker {
-            background: #1f1f1f;
-            border: 2px dashed #4CAF50;
-            border-radius: 8px;
-            margin: 15px auto;
-            max-width: 400px;
-            padding: 10px;
-            overflow: hidden;
-            position: relative;
-        }
-        .winners-ticker h4 {
-            color: #4CAF50;
-            margin-bottom: 5px;
-            font-size: 14px;
-            text-align: center;
-        }
-        .marquee-container {
-            height: 40px;
-            overflow: hidden;
-            position: relative;
-        }
-        .marquee-content {
-            position: absolute;
-            width: 100%;
-            animation: scrollUp 40s linear infinite;
-        }
-        .winner-item {
-            font-size: 13px;
-            padding: 4px 0;
-            color: #ddd;
-            text-align: center;
-        }
-        .winner-item span {
-            color: #ffcc00;
-            font-weight: bold;
-        }
-        @keyframes scrollUp {
-            0% { top: 100%; }
-            100% { top: -750%; }
+        .instructions {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #a7a9be;
         }
     </style>
 </head>
 <body>
 
-    <!-- Referral Lock Popup Modal -->
-    <div class="modal-overlay" id="referralModal">
-        <div class="modal-box">
-            <h2 id="modalTitle">🔒 Game Locked / Limit Reached!</h2>
-            <p id="modalReason">Limit poori ho chuki hai!</p>
-            
-            <div class="progress-bar-bg" id="referralProgressContainer">
-                <div class="progress-bar-fill" id="progressFill"></div>
-                <div class="progress-text" id="progressText">0 / 5 Approved Deposits Completed</div>
-            </div>
-
-            <div id="actionButtonsDiv">
-                <button class="btn" style="background: #25D366; color:#fff; width:100%; font-size:15px; margin: 8px 0;" onclick="shareReferral()">📤 Share Link on WhatsApp</button>
-                <button class="btn" style="background: #ffcc00; width:100%; font-size:15px; margin: 5px 0;" onclick="checkReferralStatus()">🔄 Check Status / Sync Approval</button>
-            </div>
-            
-            <p style="font-size: 11px; color: #888; margin-top: 8px;" id="modalHint">(Aap deposit verify karne ke baad yahan click karke approval count update kar sakte hain)</p>
-        </div>
+    <h1>Avatar Runner Game</h1>
+    
+    <div class="game-container" id="gameContainer">
+        <div id="avatar">🏃‍♂️</div>
+        <div id="obstacle"></div>
     </div>
 
-    <header>
-        <h1>🐔 Chicken Run PK</h1>
-        <p>Play Game & Deposit via TID</p>
-    </header>
-
-    <div class="wallet-box">
-        <div>Balance: <span id="userBalance">Rs. 0</span></div>
+    <div class="score-board">
+        Score: <span id="score">0</span>
     </div>
-
-    <!-- Game Area -->
-    <div class="game-container">
-        <canvas id="gameCanvas" width="400" height="250"></canvas>
-    </div>
-
-    <!-- Game Control Buttons -->
-    <div class="control-panel" style="max-width: 400px; margin: 10px auto;">
-        <button class="ctrl-btn" id="startBtn" onclick="startGame()">Start Game</button>
-        <button class="ctrl-btn" id="pauseBtn" onclick="togglePause()">Pause</button>
-    </div>
-
-    <button class="btn" id="jumpBtn" onclick="makeJump()">JUMP (TAP HERE)</button>
-
-    <!-- Quick EasyPaisa Deposit Button (Rs. 100) -->
-    <div style="max-width: 400px; margin: 10px auto;">
-        <button class="btn" style="background: #388E3C; color: #fff; width: 100%; font-size: 16px;" onclick="copyAndPromptEasyPaisa()">🚀 Fast Deposit Rs. 100 (Copy EasyPaisa)</button>
-    </div>
-
-    <!-- Withdrawal Section (Minimum Rs. 500 Option + 24Hr / 1Min Wait) -->
-    <div class="section" style="text-align: center;">
-        <h3>💰 Request Withdrawal</h3>
-        <p style="font-size: 13px; color: #aaa; margin-bottom: 5px;">Minimum Limit: <b style="color: #4CAF50;">Rs. 500</b></p>
-        <p style="font-size: 12px; color: #ff9800; margin-bottom: 10px;">⏳ Withdrawal Wait: <b>1st Withdrawal: 24 Hours | Next: 1 Minute</b></p>
-        
-        <input type="text" id="withdrawAccount" placeholder="Enter JazzCash / EasyPaisa Account No">
-        
-        <!-- Withdrawal Timer Display -->
-        <div id="withdrawStatusBox" style="margin: 10px 0; font-size: 13px; display: none; background: #333; padding: 8px; border-radius: 6px;">
-            Withdrawal Pending... Time Left: <span id="withdrawCountdown" style="color: #ffcc00; font-weight: bold;">00:00</span>
-        </div>
-
-        <button class="btn" id="withdrawBtn" style="width:100%; margin: 5px 0; background: #ffcc00; color: #000;" onclick="requestWithdrawal()">Withdraw via WhatsApp (Min 500)</button>
-    </div>
-
-    <!-- Live Winners Ticker List -->
-    <div class="winners-ticker">
-        <h4>🔴 Live Winners Feed</h4>
-        <div class="marquee-container">
-            <div class="marquee-content" id="winnersList">
-                <!-- JavaScript se names yahan insert honge -->
-            </div>
-        </div>
-    </div>
-
-    <!-- Deposit & TID Section -->
-    <div class="section">
-        <h3>EasyPaisa Deposit Verification</h3>
-        <p style="font-size: 13px; margin-bottom: 3px;">Send payment to EasyPaisa Account:</p>
-        <p style="font-size: 16px; color: #ffcc00; text-align: center; font-weight: bold; margin-bottom: 8px;">03365336003</p>
-        <p style="font-size: 12px; color: #aaa; margin-bottom: 8px;">Payment ke baad apni TID yahan enter karein:</p>
-        
-        <input type="number" id="depositAmount" placeholder="Enter Amount (e.g. 500)" value="100">
-        <input type="text" id="tidInput" placeholder="Enter Transaction ID (TID)">
-        
-        <button class="btn" style="width:100%; margin: 5px 0; background: #25D366; color: #fff;" onclick="submitTID()">Verify via WhatsApp</button>
+    
+    <div class="instructions">
+        Tap screen ya **Spacebar** dabayein jump karne ke liye!
     </div>
 
     <script>
-        // LocalStorage Setup
-        let balance = localStorage.getItem('chicken_balance') ? parseInt(localStorage.getItem('chicken_balance')) : 100;
-        let approvedDeposits = localStorage.getItem('chicken_approved_deposits') ? parseInt(localStorage.getItem('chicken_approved_deposits')) : 0;
-
-        // Withdrawal Timer Setup
-        let withdrawEndTimestamp = localStorage.getItem('chicken_withdraw_end') ? parseInt(localStorage.getItem('chicken_withdraw_end')) : 0;
-        let firstWithdrawalDone = localStorage.getItem('chicken_first_withdrawal_done') === 'true';
-
-        document.getElementById('userBalance').innerText = 'Rs. ' + balance;
-
-        function updateWithdrawTimerDisplay() {
-            let now = Date.now();
-            let statusBox = document.getElementById('withdrawStatusBox');
-            let withdrawBtn = document.getElementById('withdrawBtn');
-
-            if (withdrawEndTimestamp > now) {
-                let diffSecs = Math.floor((withdrawEndTimestamp - now) / 1000);
-                let hrs = Math.floor(diffSecs / 3600);
-                let mins = Math.floor((diffSecs % 3600) / 60);
-                let secs = diffSecs % 60;
-                
-                let timeStr = "";
-                if (hrs > 0) {
-                    timeStr = (hrs < 10 ? '0' : '') + hrs + ':' + (mins < 10 ? '0' : '') + mins + ':' + (secs < 10 ? '0' : '') + secs;
-                } else {
-                    timeStr = (mins < 10 ? '0' : '') + mins + ':' + (secs < 10 ? '0' : '') + secs;
-                }
-
-                document.getElementById('withdrawCountdown').innerText = timeStr;
-                
-                statusBox.style.display = 'block';
-                withdrawBtn.innerText = 'Withdrawal Cooldown Active';
-                withdrawBtn.style.background = '#777';
-                return true;
-            } else {
-                statusBox.style.display = 'none';
-                withdrawBtn.innerText = 'Withdraw via WhatsApp (Min 500)';
-                withdrawBtn.style.background = '#ffcc00';
-                return false;
-            }
-        }
-
-        function checkGameLockCondition() {
-            // Check Referral Condition (Balance >= 500)
-            if (balance >= 500 && approvedDeposits < 5) {
-                let percentage = (approvedDeposits / 5) * 100;
-                document.getElementById('progressFill').style.width = percentage + '%';
-                document.getElementById('progressText').innerText = approvedDeposits + ' / 5 Approved Deposits Completed';
-                
-                document.getElementById('modalTitle').innerText = "🔒 Game Locked / Limit Reached!";
-                document.getElementById('modalReason').innerHTML = `Aapka balance <b>Rs. 500 ya usse zyada</b> ho chuka hai! Mazeed game khelne aur withdraw karne ke liye apne invitees ke Rs. 100 deposit ki WhatsApp request approve karwana lazmi hai.`;
-
-                document.getElementById('referralProgressContainer').style.display = 'block';
-                document.getElementById('actionButtonsDiv').style.display = 'block';
-                document.getElementById('modalHint').style.display = 'block';
-
-                document.getElementById('referralModal').style.display = 'flex';
-                gameStarted = false;
-                isPaused = true;
-                return true; 
-            } else {
-                document.getElementById('referralModal').style.display = 'none';
-                return false; 
-            }
-        }
-
-        function shareReferral() {
-            let myUniqueId = "user_" + Math.floor(Math.random() * 100000);
-            let refLink = window.location.href.split('?')[0] + "?ref=" + myUniqueId;
-            let message = `🔥 Chicken Run PK game khelein aur paise jeetein! Rs. 100 deposit karke mujhe WhatsApp par TID bhejein taake main approve kar sakoon: ${refLink}`;
-            let whatsappURL = `https://wa.me/?text=` + encodeURIComponent(message);
-            window.open(whatsappURL, '_blank');
-        }
-
-        function checkReferralStatus() {
-            if (approvedDeposits < 5) {
-                approvedDeposits++;
-                localStorage.setItem('chicken_approved_deposits', approvedDeposits);
-                let percentage = (approvedDeposits / 5) * 100;
-                document.getElementById('progressFill').style.width = percentage + '%';
-                document.getElementById('progressText').innerText = approvedDeposits + ' / 5 Approved Deposits Completed';
-
-                if(approvedDeposits >= 5) {
-                    alert("🎉 Mubarak ho! Aapke 5 approved deposits mukammal ho gaye hain. Ab aap mazeed game play aur withdraw kar sakte hain!");
-                    document.getElementById('referralModal').style.display = 'none';
-                } else {
-                    alert(`Mazeed ${5 - approvedDeposits} approvals baqi hain taake limit unlock ho jaye.`);
-                }
-            }
-        }
-
-        // Continuous Background Loop
-        setInterval(function() {
-            updateWithdrawTimerDisplay();
-            checkGameLockCondition();
-        }, 1000);
-
-        // Initial check on load
-        checkGameLockCondition();
-        updateWithdrawTimerDisplay();
-
-        // Withdrawal Function
-        function requestWithdrawal() {
-            let accountNo = document.getElementById('withdrawAccount').value.trim();
-
-            if (!accountNo) {
-                alert("Please enter your JazzCash or EasyPaisa account number for withdrawal!");
-                return;
-            }
-
-            if (balance < 500) {
-                alert(`❌ Withdrawal Failed! Minimum withdrawal limit Rs. 500 hai. Aapka current balance Rs. ${balance} hai.`);
-                return;
-            }
-
-            if (updateWithdrawTimerDisplay()) {
-                alert("⏳ Cooldown period active hai. Thoda intezaar karein.");
-                return;
-            }
-
-            if (checkGameLockCondition()) {
-                alert("Game ya withdrawal lock hai! Pehle conditions poori karein.");
-                return;
-            }
-
-            let waitTimeMs;
-            let waitMessageText;
-
-            if (!firstWithdrawalDone) {
-                waitTimeMs = 24 * 3600 * 1000;
-                firstWithdrawalDone = true;
-                localStorage.setItem('chicken_first_withdrawal_done', 'true');
-                waitMessageText = "Please process my payment within 24 hours.";
-            } else {
-                waitTimeMs = 60 * 1000;
-                waitMessageText = "Please process my payment within 1 minute.";
-            }
-
-            withdrawEndTimestamp = Date.now() + waitTimeMs;
-            localStorage.setItem('chicken_withdraw_end', withdrawEndTimestamp);
-            updateWithdrawTimerDisplay();
-
-            let adminPhone = '923365336003';
-            let message = `Hello Admin, I want to withdraw my winnings.%0AAmount: Rs. ${balance}%0AAccount No: ${accountNo}%0A${waitMessageText}`;
-            let whatsappURL = `https://wa.me/${adminPhone}?text=${message}`;
-
-            window.open(whatsappURL, '_blank');
-        }
-
-        // EasyPaisa Account Copy & Direct Instruction Function
-        function copyAndPromptEasyPaisa() {
-            let accountNo = "03365336003";
-            
-            navigator.clipboard.writeText(accountNo).then(function() {
-                alert("EasyPaisa Account Number (03365336003) copied successfully!\n\n1. Apni EasyPaisa App kholein.\n2. Rs. 100 is number par send karein.\n3. Jo TID (Transaction ID) milegi usay neche enter karke WhatsApp par verify karwayein.");
-            }, function() {
-                alert("EasyPaisa Account: 03365336003\nAap apni EasyPaisa app open karke is number par Rs. 100 send karein aur TID niche enter karein.");
-            });
-        }
-
-        // Winners Data List
-        const winnersData = [
-            { name: "Qasim", amount: 1200 },
-            { name: "Zubair Gujjar", amount: 1500 },
-            { name: "Salman Butt", amount: 2350 },
-            { name: "Kashif Mehmood", amount: 1050 },
-            { name: "Nadeem Qureshi", amount: 4500 },
-            { name: "Rehan Mughal", amount: 2250 },
-            { name: "Tariq Jameel", amount: 5000 },
-            { name: "Adeel Malik", amount: 1120 },
-            { name: "Shehryar Khan", amount: 3300 },
-            { name: "Yasir Arafat", amount: 1800 },
-            { name: "Ali Raza", amount: 1500 },
-            { name: "Usman Khan", amount: 1000 },
-            { name: "Bilal Ahmed", amount: 3000 },
-            { name: "Hamza Ali", amount: 2000 },
-            { name: "Zainab Bibi", amount: 4000 },
-            { name: "Awais Qarni", amount: 1500 },
-            { name: "Faizan Shah", amount: 5000 },
-            { name: "Ayesha Malik", amount: 1750 },
-            { name: "Danyal Sheikh", amount: 1200 },
-            { name: "Haris Rauf", amount: 2500 }
-        ];
-
-        function generateWinnersList() {
-            let tickerHTML = '';
-            for (let i = 0; i < winnersData.length; i++) {
-                let winner = winnersData[i];
-                tickerHTML += `<div class="winner-item">🎉 <span>${winner.name}</span> won <span>Rs. ${winner.amount}</span></div>`;
-            }
-            document.getElementById('winnersList').innerHTML = tickerHTML;
-        }
-
-        generateWinnersList();
-
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
+        const avatar = document.getElementById("avatar");
+        const obstacle = document.getElementById("obstacle");
+        const scoreDisplay = document.getElementById("score");
 
         let score = 0;
-        let gravity = 0.6;
+        let isAlive;
         let gameStarted = false;
-        let isPaused = false;
-        let isGameOver = false;
 
-        let chicken = {
-            x: 50,
-            y: 170,
-            width: 30,
-            height: 30,
-            dy: 0,
-            jumpPower: -10,
-            grounded: true
-        };
-
-        let obstacle = {
-            x: 400,
-            y: 170,
-            width: 30,
-            height: 30,
-            speed: 5
-        };
-
-        let blastAnimation = {
-            active: false,
-            x: 0,
-            y: 0,
-            timer: 0
-        };
-
-        function makeJump() {
-            if (checkGameLockCondition()) return;
-            if (!gameStarted || isPaused || isGameOver) return;
-
-            if (chicken.grounded) {
-                chicken.dy = chicken.jumpPower;
-                chicken.grounded = false;
+        // Jump Function
+        function jump() {
+            if (!avatar.classList.contains("jump")) {
+                avatar.classList.add("jump");
+                setTimeout(() => {
+                    avatar.classList.remove("jump");
+                }, 600);
             }
         }
+
+        // Controls (Keyboard & Touch)
+        document.addEventListener("keydown", function (event) {
+            if (event.code === "Space" || event.key === "ArrowUp") {
+                if (!gameStarted) {
+                    startGame();
+                } else {
+                    jump();
+                }
+            }
+        });
+
+        document.addEventListener("click", function () {
+            if (!gameStarted) {
+                startGame();
+            } else {
+                jump();
+            }
+        });
 
         function startGame() {
-            if (checkGameLockCondition()) {
-                alert("Referrals baqi hain! Pehle conditions poori karein.");
-                return;
-            }
-
             gameStarted = true;
-            isPaused = false;
-            isGameOver = false;
-            blastAnimation.active = false;
             score = 0;
-            document.getElementById('pauseBtn').innerText = 'Pause';
-            obstacle.x = 400;
-            obstacle.speed = 5;
-            chicken.y = 170;
-            chicken.dy = 0;
-        }
-
-        function togglePause() {
-            if (checkGameLockCondition() || !gameStarted || isGameOver) return;
+            obstacle.style.animation = "moveObstacle 1.8s infinite linear";
             
-            isPaused = !isPaused;
-            let pauseBtn = document.getElementById('pauseBtn');
-            if (isPaused) {
-                pauseBtn.innerText = 'Resume';
-            } else {
-                pauseBtn.innerText = 'Pause';
-            }
-        }
+            // Collision Detection Loop
+            isAlive = setInterval(function () {
+                let avatarBottom = parseInt(window.getComputedStyle(avatar).getPropertyValue("bottom"));
+                let obstacleLeft = parseInt(window.getComputedStyle(obstacle).getPropertyValue("left"));
 
-        function update() {
-            if (!gameStarted || isPaused) return;
+                // Score increase
+                score++;
+                scoreDisplay.innerText = Math.floor(score / 5);
 
-            if (blastAnimation.active) {
-                blastAnimation.timer--;
-                if (blastAnimation.timer <= 0) {
-                    blastAnimation.active = false;
+                // Game Over Condition (Collision Check)
+                if (obstacleLeft > 40 && obstacleLeft < 80 && avatarBottom < 35) {
+                    alert("Game Over! Aapka Score: " + Math.floor(score / 5));
+                    resetGame();
                 }
-                return; 
-            }
-
-            if (isGameOver) return;
-
-            chicken.dy += gravity;
-            chicken.y += chicken.dy;
-
-            if (chicken.y > 170) {
-                chicken.y = 170;
-                chicken.dy = 0;
-                chicken.grounded = true;
-            }
-
-            obstacle.x -= obstacle.speed;
-            if (obstacle.x < -30) {
-                obstacle.x = 400;
-                score += 10;
-                if(score % 50 === 0) obstacle.speed += 0.5;
-            }
-
-            // Collision detection
-            if (
-                chicken.x < obstacle.x + obstacle.width &&
-                chicken.x + chicken.width > obstacle.x &&
-                chicken.y < obstacle.y + obstacle.height &&
-                chicken.y + chicken.height > obstacle.y
-            ) {
-                isGameOver = true;
-                
-                blastAnimation.active = true;
-                blastAnimation.x = obstacle.x;
-                blastAnimation.y = obstacle.y;
-                blastAnimation.timer = 40;
-
-                handleGameOverEarnings();
-            }
+            }, 10);
         }
 
-        function handleGameOverEarnings() {
-            balance -= 100;
-
-            if (balance <= 0) {
-                balance = 0;
-                alert('💥 Blast! Aapka balance khatam ho kar Rs. 0 ho gaya hai. Mazeed khelne ke liye EasyPaisa se deposit karein.');
-            } else {
-                alert('💥 Blast! Bomb se takrane ki wajah se aapke Rs. 100 minus ho gaye hain.');
-            }
-
-            localStorage.setItem('chicken_balance', balance);
-            document.getElementById('userBalance').innerText = 'Rs. ' + balance;
-
-            checkGameLockCondition();
-        }
-
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Ground
-            ctx.fillStyle = '#333';
-            ctx.fillRect(0, 200, canvas.width, 50);
-
-            if (blastAnimation.active) {
-                ctx.font = '36px Arial';
-                ctx.fillText('💥', blastAnimation.x - 5, blastAnimation.y + 25);
-            } else {
-                ctx.font = '28px Arial';
-                ctx.fillText('🐔', chicken.x - 4, chicken.y + 24);
-
-                ctx.font = '28px Arial';
-                ctx.fillText('💣', obstacle.x - 2, obstacle.y + 24);
-            }
-
-            if (!gameStarted && !isPaused && !checkGameLockCondition()) {
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.fillStyle = '#fff';
-                ctx.font = '18px Arial';
-                ctx.fillText('Click "Start Game" to Play', 95, 120);
-            }
-
-            if (isPaused && !checkGameLockCondition()) {
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.fillStyle = '#ffcc00';
-                ctx.font = '22px Arial';
-                ctx.fillText('Game Paused', 130, 130);
-            }
-
-            if (isGameOver && !blastAnimation.active) {
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.fillStyle = '#ff4444';
-                ctx.font = '16px Arial';
-                ctx.fillText('💥 Blast! -Rs. 100 Deducted', 90, 95);
-                if (balance === 0) {
-                    ctx.fillStyle = '#ffcc00';
-                    ctx.fillText('Balance Expired (Rs. 0)! Please Deposit.', 45, 125);
-                }
-                ctx.fillStyle = '#fff';
-                ctx.fillText('Click Start Game to Retry', 95, 155);
-            }
-        }
-
-        function loop() {
-            update();
-            draw();
-            requestAnimationFrame(loop);
-        }
-
-        loop();
-
-        // TID & WhatsApp Submission Logic
-        function submitTID() {
-            let amount = document.getElementById('depositAmount').value.trim();
-            let tid = document.getElementById('tidInput').value.trim();
-
-            if (!amount || !tid) {
-                alert('Please enter both Amount and Transaction ID (TID)!');
-                return;
-            }
-
-            let adminPhone = '923365336003'; 
-            let message = `Hello Admin, I have sent Rs. ${amount} via EasyPaisa to your account (03365336003).%0ATID: ${tid}%0APlease verify and approve my request.`;
-            let whatsappURL = `https://wa.me/${adminPhone}?text=${message}`;
-
-            window.open(whatsappURL, '_blank');
+        function resetGame() {
+            clearInterval(isAlive);
+            obstacle.style.animation = "none";
+            obstacle.style.left = "600px";
+            gameStarted = false;
+            score = 0;
         }
     </script>
+
+    <!-- CSS Animation style dynamically injected for obstacle movement -->
+    <style>
+        @keyframes moveObstacle {
+            0% { left: 600px; }
+            100% { left: -30px; }
+        }
+    </style>
 </body>
 </html>
